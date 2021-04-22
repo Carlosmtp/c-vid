@@ -1,5 +1,5 @@
 ### C-vid
-![C-vid](logo_cvid.png "C-vid" {width=200px height=200px})
+<a href="url"><img src="logo_cvid.png" align="left" height="200" width="200" ></a>
 Lenguaje de programación C-vid, desarrollado para el curso Fundamentos de Lenguajes de programación de la Universidad del Valle
 
 # Gramática del lenguaje:
