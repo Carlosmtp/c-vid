@@ -3,6 +3,7 @@ Lenguaje de programación C-vid, desarrollado para el curso Fundamentos de Lengu
 
 Gramática del lenguaje:
 
+```
 <programa>      ::= <globales> <expresion>
 <expresion>     ::= <identificador>
                 ::= var {<identificador> = <expresion>}*(,) in <expresion>
@@ -48,3 +49,4 @@ Gramática del lenguaje:
 ;<list-prim>     ::= vacio | vacio? | crear-lista | lista? | cabeza | cola | append
 ;<vect-prim>     ::= vector? | crear-vector | ref-vector | set-vector
 ;<reg-prim>      ::= registros? | crear-registro | ref-registro | set-registro
+```
