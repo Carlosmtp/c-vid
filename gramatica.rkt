@@ -32,12 +32,12 @@
 (define gramatica
   '(
     (programa (globales expresion) un-programa)    
-    (globales ("(" (arbno identificador "=" expresion ",") ")" ) glob-exp)
+    (globales ("(" (separated-list identificador "=" expresion ",") ")" ) glob-exp)
     (expresion (identificador) id-exp)
-    (expresion ("var" (arbno identificador "=" expresion ",") "in" expresion) var-exp)
-    (expresion ("cons"(arbno identificador "=" expresion ",") "in" expresion) cons-exp)
-    (expresion ("rec" (arbno identificador (arbno identificador ",") "=" expresion) "in" expresion) rec-exp)
-    (expresion ("unic" (arbno identificador "=" expresion ",") "in" expresion) unic-exp)
+    (expresion ("var" (separated-list identificador "=" expresion ",") "in" expresion) var-exp)
+    (expresion ("cons"(separated-list identificador "=" expresion ",") "in" expresion) cons-exp)
+    (expresion ("rec" (arbno identificador (separated-list identificador ",") "=" expresion) "in" expresion) rec-exp)
+    (expresion ("unic" (separated-list identificador "=" expresion ",") "in" expresion) unic-exp)
     (expresion (octal) oct-exp)
     (expresion (numero) num-exp)
     (expresion (caracter) cara-exp)
