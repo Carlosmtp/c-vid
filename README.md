@@ -1,5 +1,5 @@
 ### C-vid
-![C-vid](https://raw.githubusercontent.com/Carlosmtp/cvid/main/logo_cvid.png "C-vid")
+![C-vid](logo_cvid.png "C-vid")
 Lenguaje de programación C-vid, desarrollado para el curso Fundamentos de Lenguajes de programación de la Universidad del Valle
 
 # Gramática del lenguaje:
