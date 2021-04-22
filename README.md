@@ -1,8 +1,8 @@
-### C-vid
+# C-vid
 <a href="url"><img src="logo_cvid.png" align="left" height="200" width="200" ></a>
 Lenguaje de programación C-vid, desarrollado para el curso Fundamentos de Lenguajes de programación de la Universidad del Valle
 
-# Gramática del lenguaje:
+## Gramática del lenguaje:
 
 ```
 <programa>      ::= <globales> <expresion>
