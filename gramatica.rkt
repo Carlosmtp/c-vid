@@ -19,10 +19,10 @@
     (numero ("-" digit (arbno digit)) number)
     (numero (digit (arbno digit) "." digit (arbno digit)) number)
     (numero ("-" digit (arbno digit)  "." digit (arbno digit)) number)
-    (octal ("x8" "("  digit (arbno digit) ")") number)
+    (octal ("x8" "("  (arbno digit) ")") number)
     (caracter ("'" letter "'") symbol)
     (cadena ("\"" (arbno letter) "\"") string)
-    (bool ("\"" (or "true" "false") "\"") string)
+    (bool ((or "true" "false")) string)
     (for ((or "to" "downto")) string)
    )
 )
@@ -33,11 +33,9 @@
   '(
     (programa (globales expresion) un-programa)    
     (globales ("(" (arbno identificador "=" expresion ",") ")" ) glob-exp)
-
     (expresion (identificador) id-exp)
     (expresion ("var" (arbno identificador "=" expresion ",") "in" expresion) var-exp)
     (expresion ("cons"(arbno identificador "=" expresion ",") "in" expresion) cons-exp)
-    ;rec??????????
     (expresion ("rec" (arbno identificador (arbno identificador ",") "=" expresion) "in" expresion) rec-exp)
     (expresion ("unic" (arbno identificador "=" expresion ",") "in" expresion) unic-exp)
     (expresion (octal) oct-exp)
@@ -54,11 +52,9 @@
     (expresion ("cond" (arbno "["expresion expresion"]") "else" expresion "end") cond-exp)
     (expresion ("while" expr-bool "do" expresion "done") while-exp)
     (expresion ("for" identificador "=" expresion for expresion "do" expresion "done") for-to-exp)
-    
     (lista ("["(arbno expresion ";")"]") list)
     (vector ("vector" "["(arbno expresion ";")"]") vec)
     (registro ( "(" identificador "=" expresion ";" (arbno identificador "=" expresion ";") ")" ) regist)
-
     (expr-bool ("compare" "(" expresion pred-prim expresion ")" ) exprBool); cambiar nombre
     (expr-bool (oper-bin-bool "(" expr-bool "," expr-bool ")") exprBool1); cambiar nombre
     ;(expr-bool (bool) exprBool2); cambiar nombre. creo que está entrando en conflicto con (expresion (bool) bool-exp)
@@ -132,24 +128,28 @@
 (define just-scan
   (sllgen:make-string-scanner lexica gramatica))
 
-
 (define unparse-programa
   (lambda (pgm)
     (cases programa pgm
-      (un-programa (exp)))))
+      (un-programa (glob exp)
+                   (unparse-globales glob)
+                   (unparse-expresion exp)))))
+;(unparse-programa (scan&parse "(ix = 2,) 3"))
 
 (define unparse-globales
   (lambda (globals)
     (cases globales globals
-      (glob-exp (globals)))))
+      (glob-exp (ids exp)
+                (symbol->string (car ids))
+                (unparse-expresion exp)))))
 
 (define unparse-expresion
   (lambda (exp)
     (cases expresion exp
-      (id-exp (id) id)
+      (id-exp (id) (symbol->string (car id)))
       ;() ;falta!!!!
       (oct-exp (octal) octal)
-      (num-exp (num) num)
+      (num-exp (num) (number->string num))
       (cara-exp (caracter) caracter)
       (cad-exp (cadena) cadena)
       (bool-exp (bool) bool)
@@ -158,3 +158,84 @@
       (reg-exp (registro) registro)
       (expr-bool-exp (expr-bool) expr-bool)
       (else 1))));continuar!!!!
+      
+
+
+(define unparse-pred-prim
+  (lambda (cadena)
+    (cases pred-prim cadena
+      (menor () "<")
+      (mayor () ">")
+      (menor-igual () "<=")
+      (mayor-igual () ">="))))
+
+
+(define unparse-oper-bin-bool
+  (lambda (cadena)
+    (cases oper-bin-bool cadena
+    (and () "and")
+    (or () "or")
+    (xor () "xor")
+    )))
+
+(define unparse-oper-un-bool
+  (lambda (cadena)
+    (cases oper-un-bool cadena
+      (not () "not"))))
+
+
+(define unparse-prim-10
+  (lambda (cadena)
+    (cases arit-prim-10 cadena
+      (suma () "+")
+      (resta () "-")
+      (multiplicacion () "*")
+      (division () "/")
+      (aumentar () "++")
+      (disminuir () "--"))))
+
+
+(define unparse-arit-prim-8
+  (lambda (cadena)
+    (cases arit-prim-8 cadena
+      (octal-suma () "+")
+      (octal-resta () "-")
+      (octal-multiplicacion () "*")
+      (octal-aumentar () "++")
+      (octal-disminuir () "--"))))
+
+(define unparse-cad-prim
+  (lambda (cadena)
+    (cases cad-prim cadena
+      (cadena-long () "longitud")
+      (cadena-con () "concatenar"))))
+
+(define unparse-list-prim
+  (lambda (cadena)
+    (cases list-prim cadena
+      (lista-vacia () "vacio")
+      (lista-vacia-pred () "vacio?")
+      (lista-crear () "crear-lista")
+      (lista-pred () "lista?")
+      (lista-cabeza () "cabeza")
+      (lista-cola () "cola")
+      (lista-append () "append"))))
+
+
+(define unparse-vect-prim
+  (lambda (cadena)
+    (cases vect-prim cadena
+      (vector-pred () "vector?")
+      (vector-crear () "crear-vector")
+      (vector-ref () "ref-vector")
+      (vector-set () "set-vector"))))
+
+(define unparse-reg-prim
+  (lambda (cadena)
+    (cases reg-prim cadena
+      (registro-pred () "registro?")
+      (registro-crear () "crear-registro")
+      (registro-ref () "ref-registro")
+      (registro-set () "set-registro"))))
+
+
