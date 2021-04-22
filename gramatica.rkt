@@ -42,11 +42,10 @@
     (expresion (numero) num-exp)
     (expresion (caracter) cara-exp)
     (expresion (cadena) cad-exp)
-    (expresion (bool) bool-exp)
     (expresion (lista) list-exp)
     (expresion (vector) vec-exp)
     (expresion (registro) reg-exp)
-    (expresion (expr-bool) expr-bool-exp)
+    (expresion (expr-bool) boolean-exp)
     (expresion ("sequence" expresion ";" (arbno expresion ";") "end") seq-exp)
     (expresion ("if" expr-bool "then" expresion "[" "else" expresion "]" "end") if-exp)
     (expresion ("cond" (arbno "["expresion expresion"]") "else" expresion "end") cond-exp)
@@ -57,35 +56,29 @@
     (registro ( "(" identificador "=" expresion ";" (arbno identificador "=" expresion ";") ")" ) regist)
     (expr-bool ("compare" "(" expresion pred-prim expresion ")" ) exprBool); cambiar nombre
     (expr-bool (oper-bin-bool "(" expr-bool "," expr-bool ")") exprBool1); cambiar nombre
-    ;(expr-bool (bool) exprBool2); cambiar nombre. creo que está entrando en conflicto con (expresion (bool) bool-exp)
+    (expr-bool (bool) exprBool2)
     (expr-bool (oper-un-bool "(" expr-bool ")") exprBool3); cambiar nombre
-
     (pred-prim ("<") menor)
     (pred-prim (">") mayor)
     (pred-prim ("<=") menor-igual)
     (pred-prim (">=") mayor-igual)
-
     (oper-bin-bool ("and") and)
     (oper-bin-bool ("or") or)
     (oper-bin-bool ("xor") xor)
     (oper-un-bool ("not") not)
-
     (arit-prim-10 ("+") suma)
     (arit-prim-10 ("-") resta)
     (arit-prim-10 ("*") multiplicacion)
     (arit-prim-10 ("/") division)
     (arit-prim-10 ("++") aumentar)
     (arit-prim-10 ("--") disminuir)
-
     (arit-prim-8 ("+") octal-suma)
     (arit-prim-8 ("-") octal-resta)
     (arit-prim-8 ("*") octal-multiplicacion)
     (arit-prim-8 ("++") octal-aumentar)
     (arit-prim-8 ("--") octal-disminuir)
-
     (cad-prim ("longitud") cadena-long)
     (cad-prim ("concatenar") cadena-con)
-
     (list-prim ("vacio") lista-vacia)
     (list-prim ("vacio?") lista-vacia-pred)
     (list-prim ("crear-lista") lista-crear)
@@ -93,12 +86,10 @@
     (list-prim ("cabeza") lista-cabeza)
     (list-prim ("cola") lista-cola)
     (list-prim ("append") lista-append)
-
     (vect-prim ("vector?") vector-pred)
     (vect-prim ("crear-vector") vector-crear)
     (vect-prim ("ref-vector") vector-ref)
     (vect-prim ("set-vector") vector-set)
-
     (reg-prim ("registros?") registro-pred)
     (reg-prim ("crear-registro") registro-crear)
     (reg-prim ("ref-registro") registro-ref)
@@ -152,11 +143,10 @@
       (num-exp (num) (number->string num))
       (cara-exp (caracter) caracter)
       (cad-exp (cadena) cadena)
-      (bool-exp (bool) bool)
+      (boolean-exp (bool) bool)
       (list-exp (lista) lista)
       (vec-exp (vector) vector)
       (reg-exp (registro) registro)
-      (expr-bool-exp (expr-bool) expr-bool)
       (else 1))));continuar!!!!
       
 
