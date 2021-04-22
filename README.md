@@ -5,6 +5,7 @@ Gramática del lenguaje:
 
 ```
 <programa>      ::= <globales> <expresion>
+<globales>      ::= "("{<identificador> = <expresion>}")"*(,)
 <expresion>     ::= <identificador>
                 ::= var {<identificador> = <expresion>}*(,) in <expresion>
                 ::= cons {<identificador> = <expresion>}*(,) in <expresion>
@@ -31,8 +32,6 @@ Gramática del lenguaje:
 <caracter>      ::= (')<letter>(')
 <cadena>        ::= ("){<caracter>}*(")
 <bool>          ::= true | false
-<globales>      ::= {<identificador> = <expresion>}*(,)
-
 ;<lista>         ::= [{<expresion>}*(;)]
 ;<vector>        ::= vector[{<expresion>}*(;)]
 ;<registro>      ::= {{<identificador> = <expresion>}+(;)}
