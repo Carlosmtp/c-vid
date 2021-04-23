@@ -138,9 +138,11 @@
   (lambda (exp)
     (cases expresion exp
       (id-exp (id) (symbol->string (car id)))
-      ;() ;falta!!!!
-      (oct-exp (octal) octal)
       (num-exp (num) (number->string num))
+      (var-exp (var id exps) (string-append "("
+                                           (symbol->string (car id))
+                                           "=" (car (map (lambda (x) (unparse-expresion x)) exps))))
+      (oct-exp (octal) octal)
       (cara-exp (caracter) caracter)
       (cad-exp (cadena) cadena)
       (boolean-exp (bool) bool)
