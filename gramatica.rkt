@@ -123,23 +123,33 @@
   (lambda (pgm)
     (cases programa pgm
       (un-programa (glob exp)
-                   (unparse-globales glob)
-                   (unparse-expresion exp)))))
+                   (string-append (unparse-globales glob)
+                   (unparse-expresion exp))))))
 ;(unparse-programa (scan&parse "(ix = 2,) 3"))
 
 (define unparse-globales
   (lambda (globals)
     (cases globales globals
       (glob-exp (ids exp)
-                (symbol->string (car ids))
-                (unparse-expresion exp)))))
+                (string-append "("(unparse-globales-aux ids exp)") ")
+                ))))
+
+(define unparse-globales-aux
+  (lambda (ids exp)
+    (cond [(null? ids) ""]
+          [(null? (cdr ids)) (string-append (symbol->string (car ids)) " = " (unparse-expresion (car exp)))]
+          [else (string-append (symbol->string (car ids)) " = " (unparse-expresion (car exp)) ", "
+                (unparse-globales-aux (cdr ids) (cdr exp)))])))
 
 (define unparse-expresion
   (lambda (exp)
     (cases expresion exp
-      (id-exp (id) (symbol->string (car id)))
+      
+      (id-exp (id) (if (list? id)
+                       (symbol->string (car id))
+                       (symbol->string id)))
       (num-exp (num) (number->string num))
-      (var-exp (var id exps) (string-append "("
+      (var-exp (id exps) (string-append "("
                                            (symbol->string (car id))
                                            "=" (car (map (lambda (x) (unparse-expresion x)) exps))))
       (oct-exp (octal) octal)
