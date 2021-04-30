@@ -1,4 +1,5 @@
 #lang eopl
+(provide (all-defined-out))
 ;Proyecto Final: Fundamentos de Lenguajes de Programación
 ;
 ;Desarrolladores:
@@ -80,7 +81,7 @@
     (caracter ("´"(or digit letter)) symbol)
     (cadena ("\"" (arbno (or letter digit whitespace)) "\"") string)
     (bool ((or "true" "false")) string)
-    (for ((or "to" "downto")) string)
+    (hasta ((or "to" "downto")) string)
    )
 )
 
@@ -109,24 +110,26 @@
     (expresion ("if" "(" expr-bool ")" "then" expresion "[" "else" expresion "]" "end") if-exp)
     (expresion ("cond" (arbno "["expresion expresion"]") "else" expresion "end") cond-exp)
     (expresion ("while" "(" expr-bool ")" "do" expresion "done") while-exp)
-    (expresion ("for" "(" identificador "=" expresion for expresion ")" "do" expresion "done") for-to-exp)
+    (expresion ("for" "(" identificador "=" expresion hasta expresion ")" "do" expresion "done") for-to-exp)
 
     ;expresiones adicionales 
     (expresion (":" "(" expresion arit-prim expresion ")") oper-exp)
     (expresion (cad-prim cadena) pred-cadena)
     (expresion (list-prim "(" lista ")") pred-list)
-    (expresion (vect-prim vector) pred-vector)
+    (expresion (vect-prim) pred-vector)
     
-    (expresion (reg-prim registro) pred-registro)
+    (expresion (reg-prim) pred-registro)
     (expresion ("if-pred" "(" list-prim lista ")" "then" expresion "[" "else" expresion "]" "end") if)
     (expresion ("define" cadena "lambda" "("(arbno expresion)")" expresion) funcion)
+    (expresion ("set" identificador "=" expresion) set-exp)
     
     ;lista-vector-registro
     (lista ("["(separated-list expresion ";")"]") list)
     (lista ("vacia") empt-list)
-    (lista ("cons" "("expresion expresion")") cons-list)
+    (lista ("cons" "("expresion lista")") cons-list)
+    (lista ("append" "("lista lista")") append-list)
     (vector ("vector" "["(separated-list expresion ";")"]") vec)
-    (registro ( "(" identificador "=" expresion  (arbno ";" identificador "=" expresion) ")" ) regist)
+    (registro ( "{" identificador ":" expresion  (arbno "," identificador ":" expresion) "}" ) regist)
 
     ;expresiones booleanas
     (expr-bool ("compare" "(" expresion pred-prim expresion ")" ) bool-comp-exp)
@@ -164,20 +167,17 @@
     (list-prim ("vacio?") lista-vacia-pred)
     (list-prim ("lista?") lista-pred)
     (list-prim ("cabeza") lista-cabeza)
-    (list-prim ("cola") lista-cola)    
-    (list-prim ("append") lista-append)
+    (list-prim ("cola") lista-cola)
 
     ;primitivas de vectores
-    (vect-prim ("vector?") vector-pred)
-    (vect-prim ("crear-vector") vector-crear)
-    (vect-prim ("ref-vector") vector-ref)
-    (vect-prim ("set-vector") vector-set)
+    (vect-prim ("vector?" "("vector")") vector-pred)
+    (vect-prim ("ref-vector" "("numero "de" vector")") vector-ref)
+    (vect-prim ("set-vector" "("expresion "en" numero "de" vector")") vector-set)
 
     ;primitivas de registros
-    (reg-prim ("registros?") registro-pred)
-    (reg-prim ("crear-registro") registro-crear)
-    (reg-prim ("ref-registro") registro-ref)
-    (reg-prim ("set-registro") registro-set)
+    (reg-prim ("registro?" "("registro")") registro-pred)
+    (reg-prim ("ref-registro" "("identificador "de" registro")") registro-ref)
+    (reg-prim ("set-registro" "("expresion "en" identificador "de" registro")") registro-set)
     ))
 
 ;*******************************************************************************************
@@ -205,62 +205,3 @@
 
 ;******************************************************************************************
 
-;Pruebas
-
-;programa con globales y una expresion
-(scan&parse "global () x")                                      ;id-exp
-(scan&parse "global (ix = 2, cc =23, s=2) var (x=2,z=34) in e") ;var-exp
-(scan&parse "global (ix = 2) sta (a=1,b=2) in e")               ;sta-exp
-(scan&parse "global () rec x (s,d,f,g) = e1 in e2")             ;rec-exp
-(scan&parse "global () unic (a=1,b=2) in e")                    ;unic-exp
-(scan&parse "global () x8(12)")                                 ;oct-exp
-(scan&parse "global () 3")                                      ;num-exp
-(scan&parse "global () ´s")                                     ;cara-exp
-(scan&parse "global () \"a 3hola 3foo bar    mundo   3e  \"")   ;cad-exp
-(scan&parse "global () [2;3;4;5;4;3;5;a;d;v;z]")                ;list-exp
-(scan&parse "global () vector[2;3;4;5;4;3;5;a;d;v;z]")          ;vec-exp
-(scan&parse "global () (a =3;v=5)")                             ;reg-exp
-(scan&parse "global () compare(3>2)")                           ;boolean-exp (bool-comp-exp)
-(scan&parse "global () and(true,false)")                        ;boolean-exp (bool-oper-exp)
-(scan&parse "global () false")                                  ;boolean-exp (bool-exp)
-(scan&parse "global () not(false)")                             ;boolean-exp (not-bool-exp)
-(scan&parse "global () sequence (a;s;3;d;) end")                  ;seq-exp
-(scan&parse "global () if (compare(2>5)) then a [else b] end")  ;if-exp
-(scan&parse "global () cond [compare(2>5) c] else b end")       ;cond-exp
-(scan&parse "global () while (compare(2>5)) do e done")         ;while-exp
-(scan&parse "global () for (a=1 to 10) do e done")              ;for-to-exp
-(scan&parse "global () :(1 + 10)")                              ;oper-exp
-(scan&parse "global(x = 5, y = 3) var (z = 4) in sequence ((x = z; z = 9);) end ")   ;uso de variables y globales
-
-(scan&parse "global () cons(4 cons(3 [2;1;3]))")                ;cons-list
-(scan&parse "global () vacia")                                  ;empt-list
-(scan&parse "global () cabeza([1;2;3])") 
-(scan&parse "global () cabeza(cons(4 cons(3 vacia)))")
-
-
-;pruebas con funciones
-
-;función predicado
-(scan&parse
-   "global ()
-    define \"predicado\"
-      lambda (lista pred)
-         if-pred (vacio? [1;2;3])
-         then []
-         [else
-            if-pred (lista? [1;2;3])
-            then []
-            [else y]
-            end]
-         end")
-
-;funcion factorial
-(scan&parse
-   "global ()
-    define \"factorial\"
-      lambda (n)
-         cond
-             [compare (n == 0) 1]
-             [compare (n == 1) 1]
-             else :(n * 1)
-             end")
