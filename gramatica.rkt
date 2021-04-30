@@ -15,7 +15,7 @@
 ;<globales>      ::= "("{<identificador> = <expresion>}")"*(,)
 ;<expresion>     ::= <identificador>
 ;                ::= var {<identificador> = <expresion>}*(,) in <expresion>
-;                ::= cons {<identificador> = <expresion>}*(,) in <expresion>
+;                ::= sta {<identificador> = <expresion>}*(,) in <expresion>
 ;                ::= rec {<identificador> ({<identificador>}*(,)) = <expresion>}* in <expresion>
 ;                ::= unic {<identificador> = <expresion>}*(,) in <expresion>
 ;                ::= <octal>
@@ -94,7 +94,7 @@
     ;producciones de tipo expresión
     (expresion (identificador) id-exp)
     (expresion ("var" "("(separated-list identificador "=" expresion ",")")" "in" expresion) var-exp)
-    (expresion ("cons""("(separated-list identificador "=" expresion ",")")" "in" expresion) cons-exp)
+    (expresion ("sta""("(separated-list identificador "=" expresion ",")")" "in" expresion) sta-exp)
     (expresion ("rec" (arbno identificador "("(separated-list identificador ",")")" "=" expresion) "in" expresion) rec-exp)
     (expresion ("unic" "("(separated-list identificador "=" expresion ",")")" "in" expresion) unic-exp)
     (expresion (octal) oct-exp)
@@ -114,14 +114,17 @@
     ;expresiones adicionales 
     (expresion (":" "(" expresion arit-prim expresion ")") oper-exp)
     (expresion (cad-prim cadena) pred-cadena)
-    (expresion (list-prim lista) pred-list)
+    (expresion (list-prim "(" lista ")") pred-list)
     (expresion (vect-prim vector) pred-vector)
+    
     (expresion (reg-prim registro) pred-registro)
     (expresion ("if-pred" "(" list-prim lista ")" "then" expresion "[" "else" expresion "]" "end") if)
     (expresion ("define" cadena "lambda" "("(arbno expresion)")" expresion) funcion)
     
     ;lista-vector-registro
     (lista ("["(separated-list expresion ";")"]") list)
+    (lista ("vacia") empt-list)
+    (lista ("cons" "("expresion expresion")") cons-list)
     (vector ("vector" "["(separated-list expresion ";")"]") vec)
     (registro ( "(" identificador "=" expresion  (arbno ";" identificador "=" expresion) ")" ) regist)
 
@@ -158,9 +161,7 @@
     (cad-prim ("concatenar") cadena-con)
 
     ;primitivas de listas
-    (list-prim ("vacio") lista-vacia)
     (list-prim ("vacio?") lista-vacia-pred)
-    (list-prim ("crear-lista") lista-crear)
     (list-prim ("lista?") lista-pred)
     (list-prim ("cabeza") lista-cabeza)
     (list-prim ("cola") lista-cola)    
@@ -209,7 +210,7 @@
 ;programa con globales y una expresion
 (scan&parse "global () x")                                      ;id-exp
 (scan&parse "global (ix = 2, cc =23, s=2) var (x=2,z=34) in e") ;var-exp
-(scan&parse "global (ix = 2) cons (a=1,b=2) in e")              ;cons-exp
+(scan&parse "global (ix = 2) sta (a=1,b=2) in e")               ;sta-exp
 (scan&parse "global () rec x (s,d,f,g) = e1 in e2")             ;rec-exp
 (scan&parse "global () unic (a=1,b=2) in e")                    ;unic-exp
 (scan&parse "global () x8(12)")                                 ;oct-exp
@@ -229,8 +230,13 @@
 (scan&parse "global () while (compare(2>5)) do e done")         ;while-exp
 (scan&parse "global () for (a=1 to 10) do e done")              ;for-to-exp
 (scan&parse "global () :(1 + 10)")                              ;oper-exp
-
 (scan&parse "global(x = 5, y = 3) var (z = 4) in sequence ((x = z; z = 9);) end ")   ;uso de variables y globales
+
+(scan&parse "global () cons(4 cons(3 [2;1;3]))")                ;cons-list
+(scan&parse "global () vacia")                                  ;empt-list
+(scan&parse "global () cabeza([1;2;3])") 
+(scan&parse "global () cabeza(cons(4 cons(3 vacia)))")
+
 
 ;pruebas con funciones
 
