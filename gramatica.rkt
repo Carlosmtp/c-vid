@@ -48,8 +48,7 @@
 ;<pred-prim>     ::= < | > | <= | >= | == | <>
 ;<oper-bin-bool> ::= and | or | xor
 ;<oper-un-bool>  ::= not
-;<arit-prim-10>  ::= + | - | * | % | / | ++ | --
-;<arit-prim-8>   ::= + | - | *  | ++ | --
+;<arit-prim>  ::= + | - | * | % | / | ++ | --
 ;<cad-prim>      ::= longitud | concatenar
 ;<list-prim>     ::= vacio | vacio? | crear-lista | lista? | cabeza | cola | append
 ;<vect-prim>     ::= vector? | crear-vector | ref-vector | set-vector
@@ -65,14 +64,13 @@
     (white-sp (whitespace) skip)
     (comment ("//" (arbno (not #\newline))) skip)
     (identificador (letter (arbno (or letter digit))) symbol)
-    (letra (letter) symbol)
     (numero (digit (arbno digit)) number)
     (numero ("-" digit (arbno digit)) number)
     (numero (digit (arbno digit) "." digit (arbno digit)) number)
     (numero ("-" digit (arbno digit)  "." digit (arbno digit)) number)
-    (octal ("(" (arbno " ")(arbno(or "0""1""2""3""4""5""6""7")) (arbno " ")")") string)
-    (caracter ("'" letter "'") symbol)
-    (cadena ("\"" (arbno letter) "\"") string)
+    (octal ("x8("(arbno(or "0""1""2""3""4""5""6""7")) ")") string)
+    (caracter ("´"(or digit letter)) symbol)
+    (cadena ("\"" (arbno (or letter digit whitespace)) "\"") string)
     (bool ((or "true" "false")) string)
     (for ((or "to" "downto")) string)
    )
@@ -83,13 +81,14 @@
 (define gramatica
   '(
     (programa (globales expresion) un-programa)    
-    (globales ("(" (separated-list identificador "=" expresion ",") ")" ) glob-exp)
+    (globales ("global" "(" (separated-list identificador "=" expresion ",") ")" ) glob-exp)
+    
     (expresion (identificador) id-exp)
-    (expresion ("var" (separated-list identificador "=" expresion ",") "in" expresion) var-exp)
-    (expresion ("cons"(separated-list identificador "=" expresion ",") "in" expresion) cons-exp)
-    (expresion ("rec" (arbno identificador (separated-list identificador ",") "=" expresion) "in" expresion) rec-exp)
-    (expresion ("unic" (separated-list identificador "=" expresion ",") "in" expresion) unic-exp)
-    (expresion ("x8" octal) oct-exp)
+    (expresion ("var" "("(separated-list identificador "=" expresion ",")")" "in" expresion) var-exp)
+    (expresion ("cons""("(separated-list identificador "=" expresion ",")")" "in" expresion) cons-exp)
+    (expresion ("rec" (arbno identificador "("(separated-list identificador ",")")" "=" expresion) "in" expresion) rec-exp)
+    (expresion ("unic" "("(separated-list identificador "=" expresion ",")")" "in" expresion) unic-exp)
+    (expresion (octal) oct-exp)
     (expresion (numero) num-exp)
     (expresion (caracter) cara-exp)
     (expresion (cadena) cad-exp)
@@ -102,32 +101,34 @@
     (expresion ("cond" (arbno "["expresion expresion"]") "else" expresion "end") cond-exp)
     (expresion ("while" expr-bool "do" expresion "done") while-exp)
     (expresion ("for" identificador "=" expresion for expresion "do" expresion "done") for-to-exp)
-    (lista ("["(arbno expresion ";")"]") list)
-    (vector ("vector" "["(arbno expresion ";")"]") vec)
-    (registro ( "(" identificador "=" expresion ";" (arbno identificador "=" expresion ";") ")" ) regist)
-    (expr-bool ("compare" "(" expresion pred-prim expresion ")" ) exprBool); cambiar nombre
-    (expr-bool (oper-bin-bool "(" expr-bool "," expr-bool ")") exprBool1); cambiar nombre
-    (expr-bool (bool) exprBool2)
-    (expr-bool (oper-un-bool "(" expr-bool ")") exprBool3); cambiar nombre
+    (expresion (":"expresion arit-prim expresion) oper-exp)
+    
+    (lista ("["(separated-list expresion ";")"]") list)
+    (vector ("vector" "["(separated-list expresion ";")"]") vec)
+    (registro ( "(" identificador "=" expresion  (arbno ";" identificador "=" expresion) ")" ) regist)
+    
+    (expr-bool ("compare" "(" expresion pred-prim expresion ")" ) bool-comp-exp)
+    (expr-bool (oper-bin-bool "(" expr-bool "," expr-bool ")") bool-oper-exp)
+    (expr-bool (bool) bool-exp)
+    (expr-bool (oper-un-bool "(" expr-bool ")") not-bool-exp)
+    
     (pred-prim ("<") menor)
     (pred-prim (">") mayor)
     (pred-prim ("<=") menor-igual)
     (pred-prim (">=") mayor-igual)
+    
     (oper-bin-bool ("and") and)
     (oper-bin-bool ("or") or)
     (oper-bin-bool ("xor") xor)
     (oper-un-bool ("not") not)
-    (arit-prim-10 ("+") suma)
-    (arit-prim-10 ("-") resta)
-    (arit-prim-10 ("*") multiplicacion)
-    (arit-prim-10 ("/") division)
-    (arit-prim-10 ("++") aumentar)
-    (arit-prim-10 ("--") disminuir)
-    (arit-prim-8 ("+") octal-suma)
-    (arit-prim-8 ("-") octal-resta)
-    (arit-prim-8 ("*") octal-multiplicacion)
-    (arit-prim-8 ("++") octal-aumentar)
-    (arit-prim-8 ("--") octal-disminuir)
+    
+    (arit-prim ("+") suma)
+    (arit-prim ("-") resta)
+    (arit-prim ("*") multiplicacion)
+    (arit-prim ("/") division)
+    (arit-prim ("++") aumentar)
+    (arit-prim ("--") disminuir)
+    
     (cad-prim ("longitud") cadena-long)
     (cad-prim ("concatenar") cadena-con)
     (list-prim ("vacio") lista-vacia)
@@ -170,132 +171,32 @@
 (define just-scan
   (sllgen:make-string-scanner lexica gramatica))
 
-(define unparse-programa
-  (lambda (pgm)
-    (cases programa pgm
-      (un-programa (glob exp)
-                   (string-append (unparse-globales glob)
-                   (unparse-expresion exp))))))
-;(unparse-programa (scan&parse "(ix = 2,) 3"))
-
-(define unparse-globales
-  (lambda (globals)
-    (cases globales globals
-      (glob-exp (ids exp)
-                (string-append "("(unparse-globales-aux ids exp)") ")
-                ))))
-
-(define unparse-globales-aux
-  (lambda (ids exp)
-    (cond [(null? ids) ""]
-          [(null? (cdr ids)) (string-append (symbol->string (car ids)) " = " (unparse-expresion (car exp)))]
-          [else (string-append (symbol->string (car ids)) " = " (unparse-expresion (car exp)) ", "
-                (unparse-globales-aux (cdr ids) (cdr exp)))])))
-
-(define unparse-expresion
-  (lambda (exp)
-    (cases expresion exp
-      
-      (id-exp (id) (if (list? id)
-                       (symbol->string (car id))
-                       (symbol->string id)))
-      (num-exp (num) (number->string num))
-      (var-exp (ids exps exp) (string-append "var "  ;("var" (separated-list identificador "=" expresion ",") "in" expresion) var-exp)
-                                           (unparse-globales-aux ids exps) " in "(unparse-expresion exp)))
-      (oct-exp (octal) octal)
-      (cara-exp (caracter) caracter)
-      (cad-exp (cadena) cadena)
-      (boolean-exp (bool) bool)
-      (list-exp (lista) lista)
-      (vec-exp (vector) vector)
-      (reg-exp (registro) registro)
-      (else 1))));continuar!!!!
-      
-
-
-(define unparse-pred-prim
-  (lambda (cadena)
-    (cases pred-prim cadena
-      (menor () "<")
-      (mayor () ">")
-      (menor-igual () "<=")
-      (mayor-igual () ">="))))
-
-
-(define unparse-oper-bin-bool
-  (lambda (cadena)
-    (cases oper-bin-bool cadena
-    (and () "and")
-    (or () "or")
-    (xor () "xor")
-    )))
-
-(define unparse-oper-un-bool
-  (lambda (cadena)
-    (cases oper-un-bool cadena
-      (not () "not"))))
-
-
-(define unparse-prim-10
-  (lambda (cadena)
-    (cases arit-prim-10 cadena
-      (suma () "+")
-      (resta () "-")
-      (multiplicacion () "*")
-      (division () "/")
-      (aumentar () "++")
-      (disminuir () "--"))))
-
-
-(define unparse-arit-prim-8
-  (lambda (cadena)
-    (cases arit-prim-8 cadena
-      (octal-suma () "+")
-      (octal-resta () "-")
-      (octal-multiplicacion () "*")
-      (octal-aumentar () "++")
-      (octal-disminuir () "--"))))
-
-(define unparse-cad-prim
-  (lambda (cadena)
-    (cases cad-prim cadena
-      (cadena-long () "longitud")
-      (cadena-con () "concatenar"))))
-
-(define unparse-list-prim
-  (lambda (cadena)
-    (cases list-prim cadena
-      (lista-vacia () "vacio")
-      (lista-vacia-pred () "vacio?")
-      (lista-crear () "crear-lista")
-      (lista-pred () "lista?")
-      (lista-cabeza () "cabeza")
-      (lista-cola () "cola")
-      (lista-append () "append"))))
-
-
-(define unparse-vect-prim
-  (lambda (cadena)
-    (cases vect-prim cadena
-      (vector-pred () "vector?")
-      (vector-crear () "crear-vector")
-      (vector-ref () "ref-vector")
-      (vector-set () "set-vector"))))
-
-(define unparse-reg-prim
-  (lambda (cadena)
-    (cases reg-prim cadena
-      (registro-pred () "registro?")
-      (registro-crear () "crear-registro")
-      (registro-ref () "ref-registro")
-      (registro-set () "set-registro"))))
 ;******************************************************************************************
 
 ;Pruebas
 
 ;programa con globales y una expresion
-(scan&parse "(ix = 2) 3")
-
-
+(scan&parse "global () x")                                      ;id-exp
+(scan&parse "global (ix = 2, cc =23, s=2) var (x=2,z=34) in e") ;var-exp
+(scan&parse "global (ix = 2) cons (a=1,b=2) in e")              ;cons-exp
+(scan&parse "global () rec x (s,d,f,g) = e1 in e2")             ;rec-exp
+(scan&parse "global () unic (a=1,b=2) in e")                    ;unic-exp
+(scan&parse "global () x8(12)")                                      ;oct-exp
+(scan&parse "global () 3")                                           ;num-exp
+(scan&parse "global () ´s")                                     ;cara-exp
+(scan&parse "global () \"a 3hola 3foo bar    mundo   3e  \"")   ;cad-exp
+(scan&parse "global () [2;3;4;5;4;3;5;a;d;v;z]")                ;list-exp
+(scan&parse "global () vector[2;3;4;5;4;3;5;a;d;v;z]")          ;vec-exp
+(scan&parse "global () (a =3;v=5)")                             ;reg-exp
+(scan&parse "global () compare(3>2)")                           ;boolean-exp (bool-comp-exp)
+(scan&parse "global () and(true,false)")                        ;boolean-exp (bool-oper-exp)
+(scan&parse "global () false")                                  ;boolean-exp (bool-exp)
+(scan&parse "global () not(false)")                             ;boolean-exp (not-bool-exp)
+(scan&parse "global () sequence a;s;3;d; end")                  ;seq-exp
+(scan&parse "global () if compare(2>5) then a [else b] end")    ;if-exp
+(scan&parse "global () cond [compare(2>5) c] else b end")       ;cond-exp
+(scan&parse "global () while compare(2>5) do e done")           ;while-exp
+(scan&parse "global () for a=1 to 10 do e done")                ;for-to-exp
+(scan&parse "global () :1 + 10")                                ;oper-exp
 
 
