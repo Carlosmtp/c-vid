@@ -97,6 +97,7 @@
     (expresion ("var" "("(separated-list identificador "=" expresion ",")")" "in" expresion) var-exp)
     (expresion ("sta""("(separated-list identificador "=" expresion ",")")" "in" expresion) sta-exp)
     (expresion ("rec" (arbno identificador "("(separated-list identificador ",")")" "=" expresion) "in" expresion) rec-exp)
+    (expresion ("@value") c-vid-val-exp)
     (expresion ("unic" "("(separated-list identificador "=" expresion ",")")" "in" expresion) unic-exp)
     (expresion (octal) oct-exp)
     (expresion (numero) num-exp)
@@ -114,13 +115,12 @@
 
     ;expresiones adicionales 
     (expresion (":" "(" expresion arit-prim expresion ")") oper-exp)
+    (expresion ("o:" "(" expresion arit-prim-octal expresion ")") oper-exp-oct)
     (expresion (cad-prim cadena) pred-cadena)
     (expresion (list-prim "(" lista ")") pred-list)
     (expresion (vect-prim) pred-vector)
-    
     (expresion (reg-prim) pred-registro)
-    (expresion ("if-pred" "(" list-prim lista ")" "then" expresion "[" "else" expresion "]" "end") if)
-    (expresion ("define" cadena "lambda" "("(arbno expresion)")" expresion) funcion)
+    (expresion ("define" identificador "lambda" "("(arbno expresion)")" expresion) funcion)
     (expresion ("set" identificador "=" expresion) set-exp)
     
     ;lista-vector-registro
@@ -151,7 +151,7 @@
     (oper-bin-bool ("xor") xor)
     (oper-un-bool ("not") not)
 
-    ;primitivas aritmeticas
+    ;primitivas aritmeticas para decimales
     (arit-prim ("+") suma)
     (arit-prim ("-") resta)
     (arit-prim ("*") multiplicacion)
@@ -159,23 +159,30 @@
     (arit-prim ("++") aumentar)    
     (arit-prim ("--") disminuir)
 
+    ;primitivas aritmeticas para octales
+    (arit-prim-octal ("+") suma-octal)
+    (arit-prim-octal ("-") resta-octal)
+    (arit-prim-octal ("*") multiplicacion-octal)
+    (arit-prim-octal ("++") aumentar-octal)    
+    (arit-prim-octal ("--") disminuir-octal)
+
     ;primitivas de cadenas
     (cad-prim ("longitud") cadena-long)
     (cad-prim ("concatenar") cadena-con)
 
     ;primitivas de listas
-    (list-prim ("vacio?") lista-vacia-pred)
-    (list-prim ("lista?") lista-pred)
+    (expr-bool ("vacio?"  lista ) lista-vacia-pred)
+    (expr-bool ("lista?"  lista ) lista-pred)
     (list-prim ("cabeza") lista-cabeza)
     (list-prim ("cola") lista-cola)
 
     ;primitivas de vectores
-    (vect-prim ("vector?" "("vector")") vector-pred)
+    (expr-bool ("vector?" "("vector")") vector-pred)
     (vect-prim ("ref-vector" "("numero "de" vector")") vector-ref)
     (vect-prim ("set-vector" "("expresion "en" numero "de" vector")") vector-set)
 
     ;primitivas de registros
-    (reg-prim ("registro?" "("registro")") registro-pred)
+    (expr-bool ("registro?" "("registro")") registro-pred)
     (reg-prim ("ref-registro" "("identificador "de" registro")") registro-ref)
     (reg-prim ("set-registro" "("expresion "en" identificador "de" registro")") registro-set)
     ))
