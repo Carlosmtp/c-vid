@@ -116,27 +116,59 @@
     ;expresiones adicionales 
     (expresion (":" "(" expresion arit-prim expresion ")") oper-exp)
     (expresion ("o:" "(" expresion arit-prim-octal expresion ")") oper-exp-oct)
-    (expresion (cad-prim cadena) pred-cadena)
+    (expresion (cad-prim) pred-cadena)
     (expresion (list-prim "(" lista ")") pred-list)
     (expresion (vect-prim) pred-vector)
     (expresion (reg-prim) pred-registro)
     (expresion ("define" identificador "lambda" "("(arbno expresion)")" expresion) funcion)
+    (expresion ("call" identificador "("(arbno expresion)")") call-funcion)
     (expresion ("set" identificador "=" expresion) set-exp)
+
+    ;primitivas de cadenas
+    (cad-prim ("longitud"  "("cadena")") cadena-long)
+    (cad-prim ("concatenar" "("(separated-list cadena ",")")") cadena-con)
     
-    ;lista-vector-registro
+    ;---------- LISTAS -----------
     (lista ("["(separated-list expresion ";")"]") list)
     (lista ("vacia") empt-list)
     (lista ("cons" "("expresion lista")") cons-list)
     (lista ("append" "("lista lista")") append-list)
-    (vector ("vector" "["(separated-list expresion ";")"]") vec)
+    ;(lista (identificador) id-list)   ???
+    
+    ;primitivas de listas
+    (expr-bool ("lista?"  lista ) lista-pred)
+    (expr-bool ("vacio?"  lista ) lista-vacia-pred)
+    (list-prim ("cabeza") lista-cabeza)
+    (list-prim ("cola") lista-cola)
+
+    ;---------- VECTORES -----------
+    (vector ("vec" "["(separated-list expresion ";")"]") vec)
+    
+    ;primitivas de vectores
+    (expr-bool ("vector?" "("vector")") vector-pred)
+    (vect-prim ("ref-vector" "("numero "de" vector")") vector-ref)
+    (vect-prim ("set-vector" "("expresion "en" numero "de" vector")") vector-set)
+
+    ;---------- REGISTROS -----------
     (registro ( "{" identificador ":" expresion  (arbno "," identificador ":" expresion) "}" ) regist)
 
+    ;primitivas de registros
+    (expr-bool ("registro?" "("registro")") registro-pred)
+    (reg-prim ("ref-registro" "("identificador "de" registro")") registro-ref)
+    (reg-prim ("set-registro" "("expresion "en" identificador "de" registro")") registro-set)
+
+    ;---------- BOOLEANOS -----------
     ;expresiones booleanas
+    (expr-bool (bool) bool-exp)
     (expr-bool ("compare" "(" expresion pred-prim expresion ")" ) bool-comp-exp)
     (expr-bool (oper-bin-bool "(" expr-bool "," expr-bool ")") bool-oper-exp)
-    (expr-bool (bool) bool-exp)
-    (expr-bool (oper-un-bool "(" expr-bool ")") not-bool-exp)
+    (expr-bool ("not" "(" expr-bool ")") not-bool-exp)
 
+    ;operadores booleanos
+    (oper-bin-bool ("and") and)
+    (oper-bin-bool ("or") or)
+    (oper-bin-bool ("xor") xor)
+    
     ;predicado de primitivas
     (pred-prim ("<") menor)
     (pred-prim (">") mayor)
@@ -145,11 +177,7 @@
     (pred-prim ("==") igual)
     (pred-prim ("<>") entre)
 
-    ;operadores booleanos
-    (oper-bin-bool ("and") and)
-    (oper-bin-bool ("or") or)
-    (oper-bin-bool ("xor") xor)
-    (oper-un-bool ("not") not)
+    ;---------- ARITMETICA -----------
 
     ;primitivas aritmeticas para decimales
     (arit-prim ("+") suma)
@@ -165,27 +193,8 @@
     (arit-prim-octal ("*") multiplicacion-octal)
     (arit-prim-octal ("++") aumentar-octal)    
     (arit-prim-octal ("--") disminuir-octal)
-
-    ;primitivas de cadenas
-    (cad-prim ("longitud") cadena-long)
-    (cad-prim ("concatenar") cadena-con)
-
-    ;primitivas de listas
-    (expr-bool ("vacio?"  lista ) lista-vacia-pred)
-    (expr-bool ("lista?"  lista ) lista-pred)
-    (list-prim ("cabeza") lista-cabeza)
-    (list-prim ("cola") lista-cola)
-
-    ;primitivas de vectores
-    (expr-bool ("vector?" "("vector")") vector-pred)
-    (vect-prim ("ref-vector" "("numero "de" vector")") vector-ref)
-    (vect-prim ("set-vector" "("expresion "en" numero "de" vector")") vector-set)
-
-    ;primitivas de registros
-    (expr-bool ("registro?" "("registro")") registro-pred)
-    (reg-prim ("ref-registro" "("identificador "de" registro")") registro-ref)
-    (reg-prim ("set-registro" "("expresion "en" identificador "de" registro")") registro-set)
-    ))
+ )
+)
 
 ;*******************************************************************************************
 ;Tipos de datos para la sintaxis abstracta de la gramática
