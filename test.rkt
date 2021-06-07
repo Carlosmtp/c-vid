@@ -6,6 +6,7 @@
 
 ;programa con globales y una expresion
 (scan&parse "global () x")                                      ;id-exp
+(scan&parse "global () &x")                                     ;ref-id-exp
 (scan&parse "global (ix = 2, cc =23, s=2) var (x=2,z=34) in e") ;var-exp
 (scan&parse "global (ix = 2) sta (a=1,b=2) in e")               ;sta-exp
 (scan&parse "global () rec x (s,d,f,g) = e1 in e2")             ;rec-exp
@@ -30,29 +31,43 @@
 (scan&parse "global () :(1 + 10)")                              ;oper-exp
 (scan&parse "global () o:(x8(123) + x8(321))")                  ;oper-exp-oct
 (scan&parse "global () longitud (\"a 3hola 3fomundo   3e  \")") ;pred-cadena (cadena-long)
+(scan&parse "global () longitud (idcadena)")                    ;pred-cadena (cadena-long)
 (scan&parse "global () concatenar (\"foo  \", \"bar\", \"2\")") ;pred-cadena (cadena-con)
+(scan&parse "global () concatenar (idcadena)")                  ;pred-cadena (cadena-con)
 (scan&parse "global () set x=3")                                ;set-exp
 (scan&parse "global (x = 5, y = 3) var (z = 4) in sequence ({x : z, z : 9};) end ")   ;uso de variables y globales
 ;lists
 (scan&parse "global () [1;2;3;4;5;6]")                          ;list-exp (list)
 (scan&parse "global () cons(4 cons(3 [2;1;3]))")                ;list-exp (cons-list)
+(scan&parse "global () cons(4 cons(3 idlista))")                ;list-exp (cons-list)
 (scan&parse "global () append ( [1;2;3] [4;5;6] )")             ;list-exp (append-list)
+(scan&parse "global () append ( [1;2;3] idlista )")             ;list-exp (append-list)
 (scan&parse "global () lista? [1;2;3;4;5;6]")                   ;lista-pred
+(scan&parse "global () lista? idlista")                         ;lista-pred
 (scan&parse "global () vacia")                                  ;empt-list
 (scan&parse "global () vacia? []")                              ;lista-vacia-pred
+(scan&parse "global () vacia? idlista")                         ;lista-vacia-pred
 (scan&parse "global () cabeza([1;2;3])")                        ;pred-list (lista-cabeza) [list]
+(scan&parse "global () cabeza(idlista)")                        ;pred-list (lista-cabeza) [list]
 (scan&parse "global () cabeza(cons(4 cons(3 vacia)))")          ;pred-list (lista-cabeza) [cons-list]
 (scan&parse "global () cola  (cons(4 cons(3 vacia)))")          ;pred-list (lista-cola)
+(scan&parse "global () cola  (cons(4 cons(3 idlista)))")        ;pred-list (lista-cola)
 ;vectors
 (scan&parse "global () vec[1;2;3]")                             ;vec-exp (vec)
 (scan&parse "global () vector? (vec[1;2;3])")                   ;vector-pred
+(scan&parse "global () vector? (idvector)")                     ;vector-pred
 (scan&parse "global () ref-vector (3 de vec[3;3;4])")           ;pred-vector (vector-ref)
+(scan&parse "global () ref-vector (3 de idvector)")             ;pred-vector (vector-ref)
 (scan&parse "global () set-vector (2 en 3 de vec[3;3;4])")      ;pred-vector (vector-set)
+(scan&parse "global () set-vector (2 en 3 de idvector)")        ;pred-vector (vector-set)
 ;registros
 (scan&parse "global () {xc:2}")                                 ;reg-exp (regist)
 (scan&parse "global () registro? ({xc:2})")                     ;registro-pred
-(scan&parse "global () ref-registro (x de {xc:2})")             ;pred-registro (registro-ref)
-(scan&parse "global () set-registro (123 en x de {xc:2})")      ;pred-registro (registro-set)
+(scan&parse "global () registro? (idregistro)")                 ;registro-pred
+(scan&parse "global () ref-registro (xc de {xc:2})")            ;pred-registro (registro-ref)
+(scan&parse "global () ref-registro (xc de idregistro)")        ;pred-registro (registro-ref)
+(scan&parse "global () set-registro (123 en xc de {xc:2})")     ;pred-registro (registro-set)
+(scan&parse "global () set-registro (123 en xc de idregistro)") ;pred-registro (registro-set)
 ;boolean
 (scan&parse "global () true")                                   ;boolean-exp (bool-exp)
 (scan&parse "global () compare(3<2)")                           ;boolean-exp (bool-comp-exp) [menor]
@@ -70,35 +85,34 @@
 (scan&parse "global () :(1 - 10)")                              ;oper-exp (resta)
 (scan&parse "global () :(1 * 10)")                              ;oper-exp (multiplicacion)
 (scan&parse "global () :(1 / 10)")                              ;oper-exp (division)
-;(scan&parse "global () :(1 ++)")      ???                      ;oper-exp (aumentar)
-;(scan&parse "global () :(1 --)")      ???                      ;oper-exp (disminuir)
+(scan&parse "global () :(1++)")                               ;oper-exp (aumentar)
+(scan&parse "global () :(1--)")                               ;oper-exp (disminuir)
 
 ;octales
 (scan&parse "global () o:(x8(123) + x8(132))")                  ;oper-exp-oct (suma-octal)
 (scan&parse "global () o:(x8(123) - x8(132))")                  ;oper-exp-oct (resta-octal)
 (scan&parse "global () o:(x8(123) * x8(132))")                  ;oper-exp-oct (multiplicacion-octal)
-;(scan&parse "global () o:(x8(123) / x8(132))")    ???          ;oper-exp-oct (division-octal)
-;(scan&parse "global () :(1 ++)")      ???                      ;oper-exp-oct (aumentar-octal)
-;(scan&parse "global () :(1 --)")      ???                      ;oper-exp-oct (disminuir-octal)
+(scan&parse "global () o:(x8(123) ++)")                         ;oper-exp-oct (aumentar-octal)
+(scan&parse "global () o:(x8(123) --)")                          ;oper-exp-oct (disminuir-octal)
 
 ;pruebas con funciones
 ;función predicado
 (scan&parse
    "global ()
-    define predicado
+    define filtro
       lambda (lista pred)
-         if (vacio? [1;2;3])
-         then []
+         if (vacio? lista)
+         then [vacia]
          [else
-            if (lista? [1;2;3])
-            then []
-            [else y]
+            if (¿pred cabeza(lista))
+            then [cons(cabeza(lista) call filtro(cola(lista) pred))]
+            [else filtro(cola(lista) pred))]
             end]
          end")
 
 ;funcion factorial
 (scan&parse "global () call factorial (:(n - 1))") ;call-funcion
-(scan&parse       ;funcion
+(scan&parse          ;funcion
    "global ()
     define factorial
       lambda (n)
@@ -107,3 +121,4 @@
              [compare (n == 1) 1]
              else :(n * call factorial (:(n - 1)))
              end")
+

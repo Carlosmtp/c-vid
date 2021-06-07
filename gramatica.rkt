@@ -94,6 +94,7 @@
 
     ;producciones de tipo expresión
     (expresion (identificador) id-exp)
+    (expresion ("&"identificador) ref-id-exp)
     (expresion ("var" "("(separated-list identificador "=" expresion ",")")" "in" expresion) var-exp)
     (expresion ("sta""("(separated-list identificador "=" expresion ",")")" "in" expresion) sta-exp)
     (expresion ("rec" (arbno identificador "("(separated-list identificador ",")")" "=" expresion) "in" expresion) rec-exp)
@@ -114,10 +115,10 @@
     (expresion ("for" "(" identificador "=" expresion hasta expresion ")" "do" expresion "done") for-to-exp)
 
     ;expresiones adicionales 
-    (expresion (":" "(" expresion arit-prim expresion ")") oper-exp)
-    (expresion ("o:" "(" expresion arit-prim-octal expresion ")") oper-exp-oct)
+    (expresion (":" "(" expresion arit-prim")") oper-exp)
+    (expresion ("o:" "(" expresion arit-prim-octal")") oper-exp-oct)
     (expresion (cad-prim) pred-cadena)
-    (expresion (list-prim "(" lista ")") pred-list)
+    (expresion (list-prim "(" expresion ")") pred-list)
     (expresion (vect-prim) pred-vector)
     (expresion (reg-prim) pred-registro)
     (expresion ("define" identificador "lambda" "("(arbno expresion)")" expresion) funcion)
@@ -125,19 +126,18 @@
     (expresion ("set" identificador "=" expresion) set-exp)
 
     ;primitivas de cadenas
-    (cad-prim ("longitud"  "("cadena")") cadena-long)
-    (cad-prim ("concatenar" "("(separated-list cadena ",")")") cadena-con)
+    (cad-prim ("longitud"  "("expresion")") cadena-long)
+    (cad-prim ("concatenar" "("(separated-list expresion ",")")") cadena-con)
     
     ;---------- LISTAS -----------
     (lista ("["(separated-list expresion ";")"]") list)
     (lista ("vacia") empt-list)
-    (lista ("cons" "("expresion lista")") cons-list)
-    (lista ("append" "("lista lista")") append-list)
-    ;(lista (identificador) id-list)   ???
+    (lista ("cons" "("expresion expresion")") cons-list)
+    (lista ("append" "("expresion expresion")") append-list)
     
     ;primitivas de listas
-    (expr-bool ("lista?"  lista ) lista-pred)
-    (expr-bool ("vacio?"  lista ) lista-vacia-pred)
+    (expr-bool ("lista?"  expresion ) lista-pred)
+    (expr-bool ("vacio?"  expresion ) lista-vacia-pred)
     (list-prim ("cabeza") lista-cabeza)
     (list-prim ("cola") lista-cola)
 
@@ -145,23 +145,24 @@
     (vector ("vec" "["(separated-list expresion ";")"]") vec)
     
     ;primitivas de vectores
-    (expr-bool ("vector?" "("vector")") vector-pred)
-    (vect-prim ("ref-vector" "("numero "de" vector")") vector-ref)
-    (vect-prim ("set-vector" "("expresion "en" numero "de" vector")") vector-set)
+    (expr-bool ("vector?" "("expresion")") vector-pred)
+    (vect-prim ("ref-vector" "("numero "de" expresion")") vector-ref)
+    (vect-prim ("set-vector" "("expresion "en" numero "de" expresion")") vector-set)
 
     ;---------- REGISTROS -----------
     (registro ( "{" identificador ":" expresion  (arbno "," identificador ":" expresion) "}" ) regist)
 
     ;primitivas de registros
-    (expr-bool ("registro?" "("registro")") registro-pred)
-    (reg-prim ("ref-registro" "("identificador "de" registro")") registro-ref)
-    (reg-prim ("set-registro" "("expresion "en" identificador "de" registro")") registro-set)
+    (expr-bool ("registro?" "("expresion")") registro-pred)
+    (reg-prim ("ref-registro" "("identificador "de" expresion")") registro-ref)
+    (reg-prim ("set-registro" "("expresion "en" identificador "de" expresion")") registro-set)
 
     ;---------- BOOLEANOS -----------
     ;expresiones booleanas
     (expr-bool (bool) bool-exp)
     (expr-bool ("compare" "(" expresion pred-prim expresion ")" ) bool-comp-exp)
     (expr-bool (oper-bin-bool "(" expr-bool "," expr-bool ")") bool-oper-exp)
+    (expr-bool ("¿"expresion expresion) pred-bool-exp)
     (expr-bool ("not" "(" expr-bool ")") not-bool-exp)
 
     ;operadores booleanos
@@ -180,17 +181,17 @@
     ;---------- ARITMETICA -----------
 
     ;primitivas aritmeticas para decimales
-    (arit-prim ("+") suma)
-    (arit-prim ("-") resta)
-    (arit-prim ("*") multiplicacion)
-    (arit-prim ("/") division)
+    (arit-prim ("+" expresion) suma)
+    (arit-prim ("-" expresion) resta)
+    (arit-prim ("*" expresion) multiplicacion)
+    (arit-prim ("/" expresion) division)
     (arit-prim ("++") aumentar)    
     (arit-prim ("--") disminuir)
 
     ;primitivas aritmeticas para octales
-    (arit-prim-octal ("+") suma-octal)
-    (arit-prim-octal ("-") resta-octal)
-    (arit-prim-octal ("*") multiplicacion-octal)
+    (arit-prim-octal ("+" expresion) suma-octal)
+    (arit-prim-octal ("-" expresion) resta-octal)
+    (arit-prim-octal ("*" expresion) multiplicacion-octal)
     (arit-prim-octal ("++") aumentar-octal)    
     (arit-prim-octal ("--") disminuir-octal)
  )
