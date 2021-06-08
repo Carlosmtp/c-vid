@@ -124,6 +124,7 @@
     (expresion ("define" identificador "lambda" "("(arbno expresion)")" expresion) funcion)
     (expresion ("call" identificador "("(arbno expresion)")") call-funcion)
     (expresion ("set" identificador "=" expresion) set-exp)
+    (expresion ( "(" expresion (arbno expresion) ")")  app-exp)
 
     ;primitivas de cadenas
     (cad-prim ("longitud"  "("expresion")") cadena-long)

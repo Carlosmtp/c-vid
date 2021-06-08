@@ -106,11 +106,12 @@
          [else
             if (¿pred cabeza(lista))
             then [cons(cabeza(lista) call filtro(cola(lista) pred))]
-            [else filtro(cola(lista) pred))]
+            [else call filtro(cola(lista) pred)]
             end]
          end")
 
 ;funcion factorial
+
 (scan&parse "global () call factorial (:(n - 1))") ;call-funcion
 (scan&parse          ;funcion
    "global ()
@@ -121,4 +122,14 @@
              [compare (n == 1) 1]
              else :(n * call factorial (:(n - 1)))
              end")
+
+(scan&parse          ;funcion
+   "global ()
+    rec factorial (n) = cond
+             [compare (n == 0) 1]
+             [compare (n == 1) 1]
+             else :(n * call factorial (:(n - 1)))
+             end
+        in (factorial 5)")
+
 
