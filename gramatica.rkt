@@ -276,18 +276,21 @@
 (define unparse-programa
   (lambda (pgm)
     (cases programa pgm
-      (un-programa (exp)))))
+      (un-programa (global exp)
+                   (unparse-globales global) (unparse-expresion exp)))))
 
 (define unparse-globales
   (lambda (globals)
     (cases globales globals
-      (glob-exp (globals)))))
+      (glob-exp (globals expresion)
+                globals expresion))))
 
 (define unparse-expresion
   (lambda (exp)
     (cases expresion exp
       (id-exp (id) id)
-      ;() ;falta!!!!
+      (ref-id-exp (id)(string-append "&" (symbol->string id))) ;falta!!!!
+      (c-vid-val-exp () "@value")
       (oct-exp (octal) octal)
       (num-exp (num) num)
       (cara-exp (caracter) caracter)
@@ -297,4 +300,11 @@
       (vec-exp (vector) vector)
       (reg-exp (registro) registro)
       ;(expr-bool-exp (expr-bool) expr-bool)
-      (else 1))));continuar!!!! 
+      (else 1))));continuar!!!!
+
+(define unparse-oper-bin-bool
+  (lambda (oper)
+    (cases oper-bin-bool oper
+      (and () "and")
+      (or () "or")
+      (xor () "xor"))))

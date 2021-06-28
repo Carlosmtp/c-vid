@@ -42,8 +42,8 @@
 (scan&parse "global () cons(4 cons(3 idlista))")                ;list-exp (cons-list)
 (scan&parse "global () append ( [1;2;3] [4;5;6] )")             ;list-exp (append-list)
 (scan&parse "global () append ( [1;2;3] idlista )")             ;list-exp (append-list)
-(scan&parse "global () lista? [1;2;3;4;5;6]")                   ;lista-pred
-(scan&parse "global () lista? idlista")                         ;lista-pred
+(scan&parse "global () lista? ([1;2;3;4;5;6])")                   ;lista-pred
+(scan&parse "global () lista? (idlista)")                         ;lista-pred
 (scan&parse "global () vacia")                                  ;empt-list
 (scan&parse "global () vacia? []")                              ;lista-vacia-pred
 (scan&parse "global () vacia? idlista")                         ;lista-vacia-pred
@@ -101,7 +101,7 @@
    "global ()
     define filtro
       lambda (lista pred)
-         if (vacio? lista)
+         if (vacio? (lista))
          then [vacia]
          [else
             if (¿pred cabeza(lista))
