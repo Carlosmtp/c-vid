@@ -127,11 +127,8 @@
     (numero ("-" digit (arbno digit)) number)
     (numero (digit (arbno digit) "." digit (arbno digit)) number)
     (numero ("-" digit (arbno digit)  "." digit (arbno digit)) number)
-    (octal ("x8("(arbno(or "0""1""2""3""4""5""6""7")) ")") string)
     (caracter ("´"(or digit letter)) symbol)
     (cadena ("\"" (arbno (or letter digit whitespace)) "\"") string)
-    (bool ((or "true" "false")) string)
-    (hasta ((or "to" "downto")) string)
    )
 )
 
@@ -139,10 +136,12 @@
 
 (define gramatica
   '(
-    (programa (globales expresion) un-programa)    
-    (globales ("global" "(" (separated-list identificador "=" expresion ",") ")" ) glob-exp)
+    (programa (expresion) un-programa)    
+    (globales ("global") glob-exp)
 
     ;producciones de tipo expresión
+    (expresion
+     (globales "("(separated-list identificador "=" expresion ",")")") glob-list-exp)
     (expresion (identificador) id-exp)
     (expresion ("&"identificador) ref-id-exp)
     (expresion ("var" "("(separated-list identificador "=" expresion ",")")" "in" expresion) var-exp)
@@ -150,7 +149,7 @@
     (expresion ("rec" (arbno identificador "("(separated-list identificador ",")")" "=" expresion) "in" expresion) rec-exp)
     (expresion ("@value") c-vid-val-exp)
     (expresion ("unic" "("(separated-list identificador "=" expresion ",")")" "in" expresion) unic-exp)
-    (expresion (octal) oct-exp)
+    (expresion ("x8(" (arbno numero) ")") oct-exp)
     (expresion (numero) num-exp)
     (expresion (caracter) cara-exp)
     (expresion (cadena) cad-exp)
@@ -162,7 +161,9 @@
     (expresion ("if" "(" expr-bool ")" "then" expresion "[" "else" expresion "]" "end") if-exp)
     (expresion ("cond" (arbno "["expresion expresion"]") "else" expresion "end") cond-exp)
     (expresion ("while" "(" expr-bool ")" "do" expresion "done") while-exp)
-    (expresion ("for" "(" identificador "=" expresion hasta expresion ")" "do" expresion "done") for-to-exp)
+    (expresion ("to") to-exp)
+    (expresion ("downto") downto-exp)
+    (expresion ("for" "(" identificador "=" expresion expresion expresion ")" "do" expresion "done") for-to-exp)
 
     ;expresiones adicionales 
     (expresion (":" "(" expresion arit-prim")") oper-exp)
@@ -210,7 +211,8 @@
 
     ;---------- BOOLEANOS -----------
     ;expresiones booleanas
-    (expr-bool (bool) bool-exp)
+    (expr-bool ("true") true-exp)
+    (expr-bool ("false") false-exp)
     (expr-bool ("compare" "(" expresion pred-prim expresion ")" ) bool-comp-exp)
     (expr-bool (oper-bin-bool "(" expr-bool "," expr-bool ")") bool-oper-exp)
     (expr-bool ("¿"expresion expresion) pred-bool-exp)
@@ -270,28 +272,126 @@
 (define just-scan
   (sllgen:make-string-scanner lexica gramatica))
 
+;El intérprete
+
+(define interpreter
+  (sllgen:make-rep-loop "--> "
+                        (lambda (pgm) (unparse-programa pgm))
+                        (sllgen:make-stream-parser 
+                         lexica
+                         gramatica)))
 ;******************************************************************************************
 
+;Ambientes
+
+;definición del tipo de dato ambiente
+(define-datatype environment environment?
+  (empty-env-record)
+  (extended-env-record (syms (list-of symbol?))
+                       (vals (list-of scheme-value?))
+                       (env environment?)))
+
+(define scheme-value? (lambda (v) #t))
+
+;empty-env:      -> enviroment
+;función que crea un ambiente vacío
+(define empty-env  
+  (lambda ()
+    (empty-env-record)))       ;llamado al constructor de ambiente vacío
+
+(define init-env
+  (lambda ()(extend-env '() '()(empty-env))))
+
+
+;extend-env: <list-of symbols> <list-of numbers> enviroment -> enviroment
+;función que crea un ambiente extendido
+(define extend-env
+  (lambda (syms vals env)
+    (extended-env-record syms vals env))) 
+
+;función que busca un símbolo en un ambiente
+(define apply-env
+  (lambda (env sym)
+    (cases environment env
+      (empty-env-record ()
+                        (eopl:error 'apply-env "No binding for ~s" sym))
+      (extended-env-record (syms vals env)
+                           (let ((pos (list-find-position sym syms)))
+                             (if (number? pos)
+                                 (list-ref vals pos)
+                                 (apply-env env sym)))))))
+
+;Funciones auxiliares
+
+(define list-find-position
+  (lambda (sym los)
+    (list-index (lambda (sym1) (eqv? sym1 sym)) los)))
+
+(define list-index
+  (lambda (pred ls)
+    (cond
+      ((null? ls) #f)
+      ((pred (car ls)) 0)
+      (else (let ((list-index-r (list-index pred (cdr ls))))
+              (if (number? list-index-r)
+                (+ list-index-r 1)
+                #f))))))
+
+; funciones auxiliares para aplicar unparse-expresion a cada elemento de una 
+;separated-list
+(define unparse-rands
+  (lambda (rands env)
+    (car (map (lambda (x) (unparse-rand x env)) rands))))
+
+(define unparse-rand
+  (lambda (rand env)
+    (unparse-expresion rand env)))
+
+;true-value?: determina si un valor dado corresponde a un valor booleano falso o verdadero
+(define true-value?
+  (lambda (x)
+    (not (zero? x))))
+
+;Procedimientos
+(define-datatype procval procval?
+  (closure
+   (ids (list-of symbol?))
+   (body expresion?)
+   (env environment?)))
+
+;apply-procedure: evalua el cuerpo de un procedimientos en el ambiente extendido correspondiente
+(define apply-procedure
+  (lambda (proc args)
+    (cases procval proc
+      (closure (ids body env)
+               (unparse-expresion body (extend-env ids args env))))))
+
+;****************************************************************
 
 (define unparse-programa
   (lambda (pgm)
     (cases programa pgm
-      (un-programa (global exp)
-                   (unparse-globales global) (unparse-expresion exp)))))
+      (un-programa ( exp)
+                    (unparse-expresion exp (init-env))))))
 
-(define unparse-globales
-  (lambda (globals)
-    (cases globales globals
-      (glob-exp (globals expresion)
-                globals expresion))))
 
 (define unparse-expresion
-  (lambda (exp)
+  (lambda (exp env)
     (cases expresion exp
-      (id-exp (id) id)
-      (ref-id-exp (id)(string-append "&" (symbol->string id))) ;falta!!!!
+      ;(glob-list-exp (ids exps body) ids)
+      (id-exp (id) (apply-env env id))
+      (ref-id-exp (id)(string-append "&" (symbol->string id)))
+      (var-exp (ids exps cuerpo)
+               (string-append
+                "var("
+                (symbol->string (car ids))
+                "="
+                (let ((args (unparse-rands ids env)))
+                 (unparse-expresion cuerpo (extend-env ids args env)))
+                
+               ))
       (c-vid-val-exp () "@value")
-      (oct-exp (octal) octal)
+      (oct-exp (octal) (string-append "x8(" (number->string(car octal))")"))
       (num-exp (num) num)
       (cara-exp (caracter) caracter)
       (cad-exp (cadena) cadena)
@@ -300,6 +400,17 @@
       (vec-exp (vector) vector)
       (reg-exp (registro) registro)
       ;(expr-bool-exp (expr-bool) expr-bool)
+      (if-exp (test-exp true-exp false-exp)
+              (if (true-value? (unparse-expresion test-exp env))
+                  (unparse-expresion true-exp env)
+                  (unparse-expresion false-exp env)))
+      (app-exp (rator rands)
+               (let ((proc (unparse-expresion rator env))
+                     (args (unparse-rands rands env)))
+                 (if (procval? proc)
+                     (apply-procedure proc args)
+                     (eopl:error 'eval-expresion
+                                 "Attempt to apply non-procedure ~s" proc))))
       (else 1))));continuar!!!!
 
 (define unparse-oper-bin-bool
