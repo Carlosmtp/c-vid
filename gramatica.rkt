@@ -158,7 +158,7 @@
     (expresion (registro) reg-exp)
     (expresion (expr-bool) boolean-exp)
     (expresion ("sequence" "(" expresion ";" (arbno expresion ";") ")" "end") seq-exp)
-    (expresion ("if" "(" expr-bool ")" "then" expresion "[" "else" expresion "]" "end") if-exp)
+    (expresion ("if" "(" expresion ")" "then" expresion "[" "else" expresion "]" "end") if-exp)
     (expresion ("cond" (arbno "["expresion expresion"]") "else" expresion "end") cond-exp)
     (expresion ("while" "(" expr-bool ")" "do" expresion "done") while-exp)
     (expresion ("to") to-exp)
@@ -205,23 +205,23 @@
     (registro ( "{" identificador ":" expresion  (arbno "," identificador ":" expresion) "}" ) regist)
 
     ;primitivas de registros
-    (expr-bool ("registro?" "("expresion")") registro-pred)
+    (expresion ("registro?" "("expresion")") registro-pred)
     (reg-prim ("ref-registro" "("identificador "de" expresion")") registro-ref)
     (reg-prim ("set-registro" "("expresion "en" identificador "de" expresion")") registro-set)
 
     ;---------- BOOLEANOS -----------
     ;expresiones booleanas
-    (expr-bool ("true") true-exp)
-    (expr-bool ("false") false-exp)
-    (expr-bool ("compare" "(" expresion pred-prim expresion ")" ) bool-comp-exp)
-    (expr-bool (oper-bin-bool "(" expr-bool "," expr-bool ")") bool-oper-exp)
-    (expr-bool ("¿"expresion expresion) pred-bool-exp)
-    (expr-bool ("not" "(" expr-bool ")") not-bool-exp)
+    (expresion ("true") true-exp)
+    (expresion ("false") false-exp)
+    (expresion ("compare" "(" expresion pred-prim expresion ")" ) bool-comp-exp)
+    (expresion (oper-bin-bool "(" expresion "," expresion ")") bool-oper-exp)
+    (expresion ("¿"expresion expresion) pred-bool-exp)
+    (expresion ("not" "(" expresion ")") not-bool-exp)
 
     ;operadores booleanos
-    (oper-bin-bool ("and") and)
-    (oper-bin-bool ("or") or)
-    (oper-bin-bool ("xor") xor)
+    (oper-bin-bool ("and") and-oper)
+    (oper-bin-bool ("or") or-oper)
+    (oper-bin-bool ("xor") xor-oper)
     
     ;predicado de primitivas
     (pred-prim ("<") menor)
@@ -366,6 +366,8 @@
       (closure (ids body env)
                (unparse-expresion body (extend-env ids args env))))))
 
+
+
 ;****************************************************************
 
 (define unparse-programa
@@ -395,13 +397,23 @@
       (num-exp (num) num)
       (cara-exp (caracter) caracter)
       (cad-exp (cadena) cadena)
-      ;(bool-exp (bool) bool)
+      (true-exp () #t)
+      (false-exp () #f)
+      (bool-comp-exp (num1 pred num2)
+                     ((unparse-pred-prim pred)
+                      (unparse-expresion num1 env)
+                      (unparse-expresion num2 env)))
+      (bool-oper-exp (oper exp1 exp2)
+                     ((unparse-oper-bin-bool oper)
+                      (unparse-expresion exp1 env)
+                      (unparse-expresion exp2 env)))
+      (not-bool-exp (bool-value) (not (unparse-expresion bool-value env)))
       (list-exp (lista) lista)
       (vec-exp (vector) vector)
       (reg-exp (registro) registro)
       ;(expr-bool-exp (expr-bool) expr-bool)
       (if-exp (test-exp true-exp false-exp)
-              (if (true-value? (unparse-expresion test-exp env))
+              (if (unparse-expresion test-exp env)
                   (unparse-expresion true-exp env)
                   (unparse-expresion false-exp env)))
       (app-exp (rator rands)
@@ -413,9 +425,20 @@
                                  "Attempt to apply non-procedure ~s" proc))))
       (else 1))));continuar!!!!
 
+(define unparse-pred-prim
+  (lambda (boolprim)
+    (cases pred-prim boolprim
+    (menor () <) 
+    (mayor () >)
+    (menor-igual () <=)
+    (mayor-igual () >=)
+    (igual () equal?)
+    (entre () (lambda (n i f)
+                (and (>= n i) (<= n f)))))))
+
 (define unparse-oper-bin-bool
   (lambda (oper)
     (cases oper-bin-bool oper
-      (and () "and")
-      (or () "or")
-      (xor () "xor"))))
+      (and-oper () (lambda (p q) (and p q)))
+      (or-oper () (lambda (p q) (or p q)))
+      (xor-oper () (lambda (p q) (not (equal? p q)))))))
