@@ -123,28 +123,19 @@
       (un-programa (exp)
                     (unparse-expresion exp (init-env))))))
 
-
-
-
 (define unparse-expresion
   (lambda (exp env)
     (if (number? exp) exp
     (cases expresion exp
-      (glob-list-exp (ids exps exp)
-          (unparse-expresion exp (extended-env-record
+      (glob-list-exp (ids exps body)
+          (unparse-expresion body (extended-env-record
                                   ids
                                   (list->vector (map (lambda (i) (unparse-expresion i env)) exps))
                                   env)))
       (id-exp (id) (unparse-expresion(apply-env env id) env))
       (ref-id-exp (id) (unparse-ref(apply-env-ref env id))) ;(string-append "&" (symbol->string id)))
-      (var-exp (ids exps cuerpo)
-               (string-append
-                "var("
-                (symbol->string (car ids))
-                "="
-                (let ((args (unparse-rands ids env)))
-                 (unparse-expresion cuerpo (extend-env ids args env)))
-               ))
+      (var-exp (ids exps body)
+               (unparse-expresion body (extend-env ids exps env)))
       (c-vid-val-exp () "@value")
       (oct-exp (octal) (string-append "x8(" (number->string(car octal))")"))
       (num-exp (num) num)

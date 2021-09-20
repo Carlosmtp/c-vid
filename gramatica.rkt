@@ -140,10 +140,16 @@
 
     ;producciones de tipo expresión
     (expresion
-     ("global" "("(separated-list identificador "=" expresion ",")")" expresion) glob-list-exp)
-    (expresion (identificador) id-exp)
-    (expresion ("&"identificador) ref-id-exp)
-    (expresion ("var" "("(separated-list identificador "=" expresion ",")")" "in" expresion) var-exp)
+     ("global" "("
+               (separated-list identificador "=" expresion ",")
+               ")" expresion)
+             glob-list-exp) ;unparse hecho
+    (expresion (identificador) id-exp) ;unparse hecho
+    (expresion ("&"identificador) ref-id-exp) ;unparse hecho
+    (expresion ("var" "("
+                (separated-list identificador "=" expresion ",")
+                      ")" "in" expresion)
+               var-exp) ;unparse
     (expresion ("sta""("(separated-list identificador "=" expresion ",")")" "in" expresion) sta-exp)
     (expresion ("rec" (arbno identificador "("(separated-list identificador ",")")" "=" expresion) "in" expresion) rec-exp)
     (expresion ("@value") c-vid-val-exp)
