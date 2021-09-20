@@ -30,14 +30,43 @@
 ;función que busca un símbolo en un ambiente
 (define apply-env
   (lambda (env sym)
+    (deref (apply-env-ref env sym))))
+
+(define apply-env-ref
+  (lambda (env sym)
     (cases environment env
       (empty-env ()
                         (eopl:error 'apply-env "No binding for ~s" sym))
       (extended-env-record (syms vec env)
                            (let ((pos (list-find-position sym syms)))
                              (if (number? pos)
-                                 (vector-ref vec pos)
-                                 (apply-env env sym)))))))
+                                 (a-ref pos vec)
+                                 (apply-env-ref env sym)))))))
+
+; Referencias
+(define-datatype reference reference?
+  (a-ref (position integer?)
+         (vec vector?)))
+
+(define deref
+  (lambda (ref)
+    (primitive-deref ref)))
+
+(define primitive-deref
+  (lambda (ref)
+    (cases reference ref
+      (a-ref (pos vec)
+             (vector-ref vec pos)))))
+
+(define setref!
+  (lambda (ref val)
+    (primitive-setref! ref val)))
+
+(define primitive-setref!
+     (lambda (ref val)
+       (cases reference ref
+         (a-ref (pos vec)
+                (vector-set! vec pos val)))))
 
 ;Funciones auxiliares
 
@@ -114,7 +143,7 @@
                                   (list->vector (map (lambda (i) (unparse-expresion i env)) exps))
                                   env)))
       (id-exp (id) (unparse-expresion(apply-env env id) env))
-      (ref-id-exp (id)(string-append "&" (symbol->string id)))
+      (ref-id-exp (id) apply-env-ref ) ;(string-append "&" (symbol->string id)))
       (var-exp (ids exps cuerpo)
                (string-append
                 "var("
