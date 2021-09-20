@@ -7,7 +7,7 @@
 
 ;definición del tipo de dato ambiente
 (define-datatype environment environment?
-  (empty-env-record)
+  (empty-env)  ;función que crea un ambiente vacío
   (extended-env-record (syms (list-of symbol?))
                        (vals (list-of scheme-value?))
                        (env environment?)))
@@ -16,9 +16,7 @@
 
 ;empty-env:      -> enviroment
 ;función que crea un ambiente vacío
-(define empty-env  
-  (lambda ()
-    (empty-env-record)))       ;llamado al constructor de ambiente vacío
+
 
 (define init-env
   (lambda ()(extend-env '() '()(empty-env))))
@@ -34,7 +32,7 @@
 (define apply-env
   (lambda (env sym)
     (cases environment env
-      (empty-env-record ()
+      (empty-env ()
                         (eopl:error 'apply-env "No binding for ~s" sym))
       (extended-env-record (syms vals env)
                            (let ((pos (list-find-position sym syms)))
@@ -110,8 +108,8 @@
 (define unparse-expresion
   (lambda (exp env)
     (cases expresion exp
-      (glob-list-exp (ids exps body exp) (unparse-expresion exp env))
-      (id-exp (id) (apply-env env id))
+      (glob-list-exp (ids exps exp) (unparse-expresion exp (extended-env-record ids exps env)))
+      (id-exp (id) (unparse-expresion(apply-env env id) env))
       (ref-id-exp (id)(string-append "&" (symbol->string id)))
       (var-exp (ids exps cuerpo)
                (string-append

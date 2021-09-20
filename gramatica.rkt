@@ -137,11 +137,10 @@
 (define gramatica
   '(
     (programa (expresion) un-programa)
-    (globales ("global") glob-exp)
 
     ;producciones de tipo expresión
     (expresion
-     (globales "("(separated-list identificador "=" expresion ",")")" expresion) glob-list-exp)
+     ("global" "("(separated-list identificador "=" expresion ",")")" expresion) glob-list-exp)
     (expresion (identificador) id-exp)
     (expresion ("&"identificador) ref-id-exp)
     (expresion ("var" "("(separated-list identificador "=" expresion ",")")" "in" expresion) var-exp)
