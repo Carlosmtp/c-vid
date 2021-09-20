@@ -1,5 +1,6 @@
 #lang eopl
 (require "./gramatica.rkt")
+(require "./interprete.rkt")
 
 
 ;Pruebas
