@@ -141,6 +141,7 @@
       (num-exp (num) num)
       (cara-exp (caracter) caracter)
       (cad-exp (cadena) cadena)
+      (oper-exp (exp prim) ((unparse-arit-prim prim env) (unparse-expresion exp env)))
       (true-exp () #t)
       (false-exp () #f)
       (bool-comp-exp (num1 pred num2)
@@ -186,6 +187,16 @@
     (igual () equal?)
     (entre () (lambda (n i f)
                 (and (>= n i) (<= n f)))))))
+
+(define unparse-arit-prim
+  (lambda (prim env)
+    (cases arit-prim prim
+      (suma (expresion) (lambda(n) (+ n (unparse-expresion expresion env))))
+      (resta (expresion) (lambda(n) (- n (unparse-expresion expresion env))))
+      (multiplicacion (expresion) (lambda(n) (* n (unparse-expresion expresion env))))
+      (division (expresion) (lambda(n) (/ n (unparse-expresion expresion env))))
+      (aumentar () (lambda(n) (+ n 1)))
+      (disminuir () (lambda(n) (- n 1))))))
 
 (define unparse-oper-bin-bool
   (lambda (oper)
