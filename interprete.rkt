@@ -2,6 +2,40 @@
 (provide (all-defined-out))
 (require "./gramatica.rkt")
 
+;El intérprete
+
+(define interpreter
+  (sllgen:make-rep-loop "--> "
+                        (lambda (pgm) (unparse-programa pgm))
+                        (sllgen:make-stream-parser 
+                         lexica
+                         gramatica)))
+
+; Referencias
+(define-datatype reference reference?
+  (a-ref (position integer?)
+         (vec vector?)))
+
+(define deref
+  (lambda (ref)
+    (primitive-deref ref)))
+
+(define primitive-deref
+  (lambda (ref)
+    (cases reference ref
+      (a-ref (pos vec)
+             (vector-ref vec pos)))))
+
+(define setref!
+  (lambda (ref val)
+    (primitive-setref! ref val)))
+
+(define primitive-setref!
+     (lambda (ref val)
+       (cases reference ref
+         (a-ref (pos vec)
+                (vector-set! vec pos val)))))
+
 
 ;Ambientes
 
@@ -14,8 +48,6 @@
 
 ;empty-env:      -> enviroment
 ;función que crea un ambiente vacío
-
-
 (define init-env
   (lambda ()
     (empty-env)))
@@ -43,30 +75,6 @@
                                  (a-ref pos vec)
                                  (apply-env-ref env sym)))))))
 
-; Referencias
-(define-datatype reference reference?
-  (a-ref (position integer?)
-         (vec vector?)))
-
-(define deref
-  (lambda (ref)
-    (primitive-deref ref)))
-
-(define primitive-deref
-  (lambda (ref)
-    (cases reference ref
-      (a-ref (pos vec)
-             (vector-ref vec pos)))))
-
-(define setref!
-  (lambda (ref val)
-    (primitive-setref! ref val)))
-
-(define primitive-setref!
-     (lambda (ref val)
-       (cases reference ref
-         (a-ref (pos vec)
-                (vector-set! vec pos val)))))
 
 ;Funciones auxiliares
 
@@ -84,15 +92,7 @@
                 (+ list-index-r 1)
                 #f))))))
 
-; funciones auxiliares para aplicar unparse-expresion a cada elemento de una 
-;separated-list
-(define unparse-rands
-  (lambda (rands env)
-    (car (map (lambda (x) (unparse-rand x env)) rands))))
 
-(define unparse-rand
-  (lambda (rand env)
-    (unparse-expresion rand env)))
 
 ;true-value?: determina si un valor dado corresponde a un valor booleano falso o verdadero
 (define true-value?
@@ -123,14 +123,7 @@
       (un-programa (exp)
                     (unparse-expresion exp (init-env))))))
 
-;El intérprete
 
-(define interpreter
-  (sllgen:make-rep-loop "--> "
-                        (lambda (pgm) (unparse-programa pgm))
-                        (sllgen:make-stream-parser 
-                         lexica
-                         gramatica)))
 
 
 (define unparse-expresion
@@ -207,3 +200,9 @@
       (and-oper () (lambda (p q) (and p q)))
       (or-oper () (lambda (p q) (or p q)))
       (xor-oper () (lambda (p q) (not (equal? p q)))))))
+
+; funciones auxiliares para aplicar unparse-expresion a cada elemento de una 
+;separated-list
+(define unparse-rands
+  (lambda (rands env)
+    (car (map (lambda (i) (unparse-expresion i env)) rands))))
