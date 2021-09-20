@@ -143,7 +143,7 @@
                                   (list->vector (map (lambda (i) (unparse-expresion i env)) exps))
                                   env)))
       (id-exp (id) (unparse-expresion(apply-env env id) env))
-      (ref-id-exp (id) apply-env-ref ) ;(string-append "&" (symbol->string id)))
+      (ref-id-exp (id) (unparse-ref(apply-env-ref env id))) ;(string-append "&" (symbol->string id)))
       (var-exp (ids exps cuerpo)
                (string-append
                 "var("
@@ -184,6 +184,11 @@
                      (eopl:error 'eval-expresion
                                  "Attempt to apply non-procedure ~s" proc))))
       (else 1)))));continuar!!!!
+
+(define unparse-ref
+  (lambda (ref)
+    (cases reference ref
+      (a-ref (pos vec) (list pos vec)))))
 
 (define unparse-pred-prim
   (lambda (boolprim)
