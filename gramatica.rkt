@@ -153,7 +153,7 @@
     (expresion (caracter) cara-exp)
     (expresion (cadena) cad-exp)
     (expresion (lista) list-exp)
-    (expresion (vector) vec-exp)
+    (expresion (vect) vec-exp)
     (expresion (registro) reg-exp)
     (expresion (expr-bool) boolean-exp)
     (expresion ("sequence" "(" expresion ";" (arbno expresion ";") ")" "end") seq-exp)
@@ -169,7 +169,7 @@
     (expresion ("o:" "(" expresion arit-prim-octal")") oper-exp-oct)
     (expresion (cad-prim) pred-cadena)
     (expresion (list-prim "(" expresion ")") pred-list)
-    (expresion (vect-prim) pred-vector)
+    (expresion (vect-prim) pred-vect)
     (expresion (reg-prim) pred-registro)
     (expresion ("define" identificador "lambda" "("(arbno expresion)")" expresion) funcion)
     (expresion ("call" identificador "("(arbno expresion)")") call-funcion)
@@ -181,7 +181,7 @@
     (cad-prim ("concatenar" "("(separated-list expresion ",")")") cadena-con)
     
     ;---------- LISTAS -----------
-    (lista ("["(separated-list expresion ";")"]") list)
+    (lista ("["(separated-list expresion ";")"]") list-e)
     (lista ("vacia") empt-list)
     (lista ("cons" "("expresion expresion")") cons-list)
     (lista ("append" "("expresion expresion")") append-list)
@@ -193,12 +193,12 @@
     (list-prim ("cola") lista-cola)
 
     ;---------- VECTORES -----------
-    (vector ("vec" "["(separated-list expresion ";")"]") vec)
+    (vect ("vec" "["(separated-list expresion ";")"]") vec)
     
     ;primitivas de vectores
-    (expr-bool ("vector?" "("expresion")") vector-pred)
-    (vect-prim ("ref-vector" "("numero "de" expresion")") vector-ref)
-    (vect-prim ("set-vector" "("expresion "en" numero "de" expresion")") vector-set)
+    (expr-bool ("vect?" "("expresion")") vect-pred)
+    (vect-prim ("ref-vect" "("numero "de" expresion")") vect-ref)
+    (vect-prim ("set-vect" "("expresion "en" numero "de" expresion")") vect-set)
 
     ;---------- REGISTROS -----------
     (registro ( "{" identificador ":" expresion  (arbno "," identificador ":" expresion) "}" ) regist)

@@ -9,24 +9,23 @@
 (define-datatype environment environment?
   (empty-env)  ;función que crea un ambiente vacío
   (extended-env-record (syms (list-of symbol?))
-                       (vals (list-of scheme-value?))
+                       (vec vector?)
                        (env environment?)))
-
-(define scheme-value? (lambda (v) #t))
 
 ;empty-env:      -> enviroment
 ;función que crea un ambiente vacío
 
 
 (define init-env
-  (lambda ()(extend-env '() '()(empty-env))))
+  (lambda ()
+    (empty-env)))
 
 
 ;extend-env: <list-of symbols> <list-of numbers> enviroment -> enviroment
 ;función que crea un ambiente extendido
 (define extend-env
   (lambda (syms vals env)
-    (extended-env-record syms vals env))) 
+    (extended-env-record syms (list->vector vals) env))) 
 
 ;función que busca un símbolo en un ambiente
 (define apply-env
@@ -34,10 +33,10 @@
     (cases environment env
       (empty-env ()
                         (eopl:error 'apply-env "No binding for ~s" sym))
-      (extended-env-record (syms vals env)
+      (extended-env-record (syms vec env)
                            (let ((pos (list-find-position sym syms)))
                              (if (number? pos)
-                                 (list-ref vals pos)
+                                 (vector-ref vec pos)
                                  (apply-env env sym)))))))
 
 ;Funciones auxiliares
@@ -107,8 +106,13 @@
 
 (define unparse-expresion
   (lambda (exp env)
+    (if (number? exp) exp
     (cases expresion exp
-      (glob-list-exp (ids exps exp) (unparse-expresion exp (extended-env-record ids exps env)))
+      (glob-list-exp (ids exps exp)
+          (unparse-expresion exp (extended-env-record
+                                  ids
+                                  (list->vector (map (lambda (i) (unparse-expresion i env)) exps))
+                                  env)))
       (id-exp (id) (unparse-expresion(apply-env env id) env))
       (ref-id-exp (id)(string-append "&" (symbol->string id)))
       (var-exp (ids exps cuerpo)
@@ -118,7 +122,6 @@
                 "="
                 (let ((args (unparse-rands ids env)))
                  (unparse-expresion cuerpo (extend-env ids args env)))
-                
                ))
       (c-vid-val-exp () "@value")
       (oct-exp (octal) (string-append "x8(" (number->string(car octal))")"))
@@ -151,7 +154,7 @@
                      (apply-procedure proc args)
                      (eopl:error 'eval-expresion
                                  "Attempt to apply non-procedure ~s" proc))))
-      (else 1))));continuar!!!!
+      (else 1)))));continuar!!!!
 
 (define unparse-pred-prim
   (lambda (boolprim)
