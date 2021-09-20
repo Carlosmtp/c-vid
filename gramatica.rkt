@@ -149,7 +149,7 @@
     (expresion ("var" "("
                 (separated-list identificador "=" expresion ",")
                       ")" "in" expresion)
-               var-exp) ;unparse
+               var-exp) ;unparse hecho
     (expresion ("sta""("(separated-list identificador "=" expresion ",")")" "in" expresion) sta-exp)
     (expresion ("rec" (arbno identificador "("(separated-list identificador ",")")" "=" expresion) "in" expresion) rec-exp)
     (expresion ("@value") c-vid-val-exp)
@@ -179,7 +179,7 @@
     (expresion (reg-prim) pred-registro)
     (expresion ("define" identificador "lambda" "("(arbno expresion)")" expresion) funcion)
     (expresion ("call" identificador "("(arbno expresion)")") call-funcion)
-    (expresion ("set" identificador "=" expresion) set-exp)
+    (expresion ("set" identificador "=" expresion) set-exp) ;unparse hecho
     (expresion ( "(" expresion (arbno expresion) ")")  app-exp)
 
     ;primitivas de cadenas

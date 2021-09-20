@@ -128,14 +128,14 @@
     (if (number? exp) exp
     (cases expresion exp
       (glob-list-exp (ids exps body)
-          (unparse-expresion body (extended-env-record
+          (unparse-expresion body (extend-env
                                   ids
-                                  (list->vector (map (lambda (i) (unparse-expresion i env)) exps))
+                                  (unparse-rands exps env)
                                   env)))
       (id-exp (id) (unparse-expresion(apply-env env id) env))
-      (ref-id-exp (id) (unparse-ref(apply-env-ref env id))) ;(string-append "&" (symbol->string id)))
+      (ref-id-exp (id) (unparse-ref(apply-env-ref env id)))
       (var-exp (ids exps body)
-               (unparse-expresion body (extend-env ids exps env)))
+               (unparse-expresion body (extend-env ids (unparse-rands exps env) env)))
       (c-vid-val-exp () "@value")
       (oct-exp (octal) (string-append "x8(" (number->string(car octal))")"))
       (num-exp (num) num)
@@ -167,12 +167,14 @@
                      (apply-procedure proc args)
                      (eopl:error 'eval-expresion
                                  "Attempt to apply non-procedure ~s" proc))))
+      (set-exp (id exp)
+               (setref! (unparse-ref(apply-env-ref env id)) exp))
       (else 1)))));continuar!!!!
 
 (define unparse-ref
   (lambda (ref)
     (cases reference ref
-      (a-ref (pos vec) (list pos vec)))))
+      (a-ref (pos vec) (a-ref pos vec)))))
 
 (define unparse-pred-prim
   (lambda (boolprim)
@@ -196,4 +198,4 @@
 ;separated-list
 (define unparse-rands
   (lambda (rands env)
-    (car (map (lambda (i) (unparse-expresion i env)) rands))))
+    (map (lambda (i) (unparse-expresion i env)) rands)))
