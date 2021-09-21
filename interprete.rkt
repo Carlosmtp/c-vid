@@ -137,11 +137,12 @@
       (var-exp (ids exps body)
                (unparse-expresion body (extend-env ids (unparse-rands exps env) env)))
       (c-vid-val-exp () "@value")
-      (oct-exp (octal) (string-append "x8(" (number->string(car octal))")"))
+      (oct-exp (octal) octal)
       (num-exp (num) num)
       (cara-exp (caracter) caracter)
       (cad-exp (cadena) cadena)
       (oper-exp (exp prim) ((unparse-arit-prim prim env) (unparse-expresion exp env)))
+      (oper-exp-oct (exp prim) ((unparse-arit-prim-octal prim env) (unparse-expresion exp env)))
       (true-exp () #t)
       (false-exp () #f)
       (bool-comp-exp (num1 pred num2)
@@ -198,6 +199,15 @@
       (aumentar () (lambda(n) (+ n 1)))
       (disminuir () (lambda(n) (- n 1))))))
 
+(define unparse-arit-prim-octal
+  (lambda (prim env)
+    (cases arit-prim-octal prim
+      (suma-octal (expresion) (lambda(n) (sumaOctal n (unparse-expresion expresion env))))
+      (resta-octal (expresion) (lambda(n) (restaOctal n (unparse-expresion expresion env))))
+      (multiplicacion-octal (expresion) (lambda(n) (multiplicacionOctal n (unparse-expresion expresion env))))
+      (aumentar-octal () (lambda(n) (+ n 1)))
+      (disminuir-octal () (lambda(n) (- n 1))))))
+
 (define unparse-oper-bin-bool
   (lambda (oper)
     (cases oper-bin-bool oper
@@ -210,3 +220,107 @@
 (define unparse-rands
   (lambda (rands env)
     (map (lambda (i) (unparse-expresion i env)) rands)))
+
+
+;funciones para numeros octales
+
+
+;Base
+(define N 8)
+
+;----------------------------------------------------------------------------------------------------
+
+;zero: void -> null list
+;purpose: definición de n=0
+;usage: zero() retorna una lista vacía
+(define zero (lambda () '()))
+
+;----------------------------------------------------------------------------------------------------
+
+;is-zero?: list -> boolean
+;purpose: verificar si la lista ingresada es zero
+;usage: (is-zero? n) retorna #t si n es zero, de lo contrario retorna #f
+(define is-zero? (lambda (n) (or (null? n) (equal? n '(0)))))
+
+;----------------------------------------------------------------------------------------------------
+
+;valid-in-N-base?: list -> boolean
+;purpose: verificar si la lista ingresada es un n válido en la base N
+;usage: (valid-in-N-base n) retorna #t si n es válido en la base N, de lo contrario retorna #f
+(define valid-in-N-base?
+  (lambda (n)
+    (cond
+      [(is-zero? n) #t]
+      [(>= (car n) N) #f]
+      [(<(car n) N) (valid-in-N-base? (cdr n))])))
+
+;----------------------------------------------------------------------------------------------------
+
+;sucessor: list -> list
+;purpose: retornar el sucesor de n en base N
+;usage (successor n) retrona una lista con el sucesor de n si es una
+;                             representación válida en N, de lo contrario
+;                             retorna un error
+(define successor
+  (lambda (n)
+    (cond
+      [(is-zero? n) (list 1)]
+      [(valid-in-N-base? n)
+       (cond
+         [(= (car n) (- N 1))
+          (cons 0 (successor (cdr n)))]
+         [(< (car n) (- N 1)) (cons (+ (car n) 1 ) (cdr n))])]
+      [else (eopl:error 'Bignum "No se pueden representar números con dígitos mayores o iguales a N")])))
+
+;----------------------------------------------------------------------------------------------------
+
+;predecessor: list -> list
+;purpose: retornar el predecesor de n en base N
+;usage (successor n) retrona una lista con el predecesor de n si es una
+;                             representación válida en N, de lo contrario
+;                             retorna un error
+(define predecessor
+    (lambda (n)
+    (cond
+      [(is-zero? n) (eopl:error 'Bignum "No se pueden representar números menores que 0")]
+      [(valid-in-N-base? n)
+       (cond
+         [(equal? n (successor '())) '()]
+         [(= (car n) 0) (cons (- N 1) (predecessor (cdr n)))]
+         [else (cons (- (car n) 1 ) (cdr n))])]
+      [else (eopl:error 'Bignum "No se pueden representar números con dígitos mayores o iguales a N")])))
+
+
+;-------------------------------------CÓDIGO CLIENTE------------------------------------------
+
+;suma: list -> list
+;purpose: sumar dos n en base N
+;usage (suma x y) retorna la suma en base N de x e y
+(define sumaOctal
+  (lambda (x y)
+    (if (is-zero? x)
+        y
+        (successor (sumaOctal (predecessor x) y)))))
+
+;----------------------------------------------------------------------------------------------------
+
+;resta: list -> list
+;purpose: restar dos n en base N
+;usage (resta x y) retorna la resta en base N de x e y
+(define restaOctal
+  (lambda (x y)
+    (if (is-zero? y)
+        x
+        (predecessor (restaOctal  x (predecessor y))))))
+
+;----------------------------------------------------------------------------------------------------
+
+;multiplicacion: list -> list
+;purpose: multiplicar dos n en base N
+;usage (multiplicacion x y) retorna la multiplicación en base N de x e y
+(define multiplicacionOctal
+  (lambda (x y)
+    (if (is-zero? x)
+        (zero)
+        (sumaOctal (multiplicacionOctal (predecessor x) y) y))
+    ))

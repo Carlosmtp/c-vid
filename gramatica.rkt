@@ -171,7 +171,6 @@
     (expresion ("for" "(" identificador "=" expresion expresion expresion ")" "do" expresion "done") for-to-exp)
 
     ;expresiones adicionales 
-    (expresion ("o:" "(" expresion arit-prim-octal")") oper-exp-oct)
     (expresion (cad-prim) pred-cadena)
     (expresion (list-prim "(" expresion ")") pred-list)
     (expresion (vect-prim) pred-vect)
@@ -246,6 +245,7 @@
     (arit-prim ("++") aumentar)    
     (arit-prim ("--") disminuir)
 
+    (expresion ("o:" "(" expresion arit-prim-octal")") oper-exp-oct)
     ;primitivas aritmeticas para octales
     (arit-prim-octal ("+" expresion) suma-octal)
     (arit-prim-octal ("-" expresion) resta-octal)
