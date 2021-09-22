@@ -142,7 +142,8 @@
       (cara-exp (caracter) caracter)
       (cad-exp (cadena) cadena)
       (oper-exp (exp prim) ((unparse-arit-prim prim env) (unparse-expresion exp env)))
-      (oper-exp-oct (exp prim) ((unparse-arit-prim-octal prim env) (unparse-expresion exp env)))
+      (oper-exp-oct (exp prim)
+           (string-append "x8(" (numlist->string((unparse-arit-prim-octal prim env) (unparse-expresion exp env))) ")" ))
       (true-exp () #t)
       (false-exp () #f)
       (bool-comp-exp (num1 pred num2)
@@ -172,6 +173,17 @@
       (set-exp (id exp)
                (setref! (unparse-ref(apply-env-ref env id)) exp))
       (else 1)))));continuar!!!!
+
+(define numlist->string
+  (lambda (l)
+    (cond
+      [(null? l) ""]
+      [(null? (cdr l)) (number->string(car l))]
+      [else (string-append
+             (number->string(car l))
+             " "
+             (numlist->string (cdr l)))]
+      )))
 
 (define unparse-ref
   (lambda (ref)

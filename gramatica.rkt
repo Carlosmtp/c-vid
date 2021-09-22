@@ -254,7 +254,7 @@
     (arit-prim-octal ("--") disminuir-octal)
  )
 )
-
+;o:(x8(1)+ x8(2))
 ;*******************************************************************************************
 ;Tipos de datos para la sintaxis abstracta de la gramática
 
