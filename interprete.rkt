@@ -121,21 +121,24 @@
   (lambda (pgm)
     (cases programa pgm
       (un-programa (exp)
-                    (unparse-expresion exp (init-env))))))
+                    (unparse-expresion exp (vector-ref env-programa 0))))))
 
 (define unparse-expresion
   (lambda (exp env)
     (if (number? exp) exp
     (cases expresion exp
       (glob-list-exp (ids exps body)
-          (unparse-expresion body (extend-env
+          (unparse-expresion body
+             (set-env
+              (extend-env
                                   ids
                                   (unparse-rands exps env)
-                                  env)))
+                                  env))
+                             ))
       (id-exp (id) (unparse-expresion(apply-env env id) env))
       (ref-id-exp (id) (unparse-ref(apply-env-ref env id)))
       (var-exp (ids exps body)
-               (unparse-expresion body (extend-env ids (unparse-rands exps env) env)))
+               (unparse-expresion body  (set-env(extend-env ids (unparse-rands exps env) env))))
       (c-vid-val-exp () "@value")
       (oct-exp (octal) octal)
       (num-exp (num) num)
@@ -336,3 +339,10 @@
         (zero)
         (sumaOctal (multiplicacionOctal (predecessor x) y) y))
     ))
+(define env-programa
+ (vector (init-env)))
+(define set-env
+  (lambda (v)
+    (begin
+    (vector-set! env-programa 0 v)
+    (vector-ref env-programa 0))))
