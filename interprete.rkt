@@ -52,6 +52,17 @@
   (lambda ()
     (empty-env)))
 
+;crea un vector que contiene el ambiente del programa
+(define env-programa
+ (vector (init-env)))
+
+;actualiza el ambiente del programa contenido en el vector env-programa
+(define set-env
+  (lambda (v)
+    (begin
+    (vector-set! env-programa 0 v)
+    (vector-ref env-programa 0))))
+
 
 ;extend-env: <list-of symbols> <list-of numbers> enviroment -> enviroment
 ;función que crea un ambiente extendido
@@ -339,10 +350,3 @@
         (zero)
         (sumaOctal (multiplicacionOctal (predecessor x) y) y))
     ))
-(define env-programa
- (vector (init-env)))
-(define set-env
-  (lambda (v)
-    (begin
-    (vector-set! env-programa 0 v)
-    (vector-ref env-programa 0))))

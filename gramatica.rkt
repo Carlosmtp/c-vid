@@ -142,7 +142,7 @@
     (expresion
      ("global" "("
                (separated-list identificador "=" expresion ",")
-               ")" expresion)
+               ")" expresion) 
              glob-list-exp) ;unparse hecho
     (expresion (identificador) id-exp) ;unparse hecho
     (expresion ("&"identificador) ref-id-exp) ;unparse hecho
