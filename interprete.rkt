@@ -151,13 +151,13 @@
       (var-exp (ids exps body)
                (unparse-expresion body  (set-env(extend-env ids (unparse-rands exps env) env))))
       (c-vid-val-exp () "@value")
-      (oct-exp (octal) octal)
+      (oct-exp (octal)  (cons 'x8 octal))
       (num-exp (num) num)
       (cara-exp (caracter) caracter)
       (cad-exp (cadena) cadena)
       (oper-exp (exp prim) ((unparse-arit-prim prim env) (unparse-expresion exp env)))
       (oper-exp-oct (exp prim)
-           (string-append "x8(" (numlist->string((unparse-arit-prim-octal prim env) (unparse-expresion exp env))) ")" ))
+           (unparse-expresion (oct-exp ((unparse-arit-prim-octal prim env) (cdr(unparse-expresion  exp env)))) env))
       (true-exp () #t)
       (false-exp () #f)
       (bool-comp-exp (num1 pred num2)
@@ -228,9 +228,9 @@
 (define unparse-arit-prim-octal
   (lambda (prim env)
     (cases arit-prim-octal prim
-      (suma-octal (expresion) (lambda(n) (sumaOctal n (unparse-expresion expresion env))))
-      (resta-octal (expresion) (lambda(n) (restaOctal n (unparse-expresion expresion env))))
-      (multiplicacion-octal (expresion) (lambda(n) (multiplicacionOctal n (unparse-expresion expresion env))))
+      (suma-octal (expresion) (lambda(n) (sumaOctal n (cdr(unparse-expresion expresion env)))))
+      (resta-octal (expresion) (lambda(n) (restaOctal n (cdr(unparse-expresion expresion env)))))
+      (multiplicacion-octal (expresion) (lambda(n) (multiplicacionOctal n (cdr(unparse-expresion expresion env)))))
       (aumentar-octal () (lambda(n) (+ n 1)))
       (disminuir-octal () (lambda(n) (- n 1))))))
 

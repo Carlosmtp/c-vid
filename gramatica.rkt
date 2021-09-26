@@ -154,7 +154,7 @@
     (expresion ("rec" (arbno identificador "("(separated-list identificador ",")")" "=" expresion) "in" expresion) rec-exp)
     (expresion ("@value") c-vid-val-exp)
     (expresion ("unic" "("(separated-list identificador "=" expresion ",")")" "in" expresion) unic-exp)
-    (expresion ("x8(" (arbno numero) ")") oct-exp)
+    (expresion ("(x8" (arbno numero) ")") oct-exp) ;unparse hecho
     (expresion (numero) num-exp)
     (expresion (caracter) cara-exp)
     (expresion (cadena) cad-exp)
@@ -178,7 +178,7 @@
     (expresion ("define" identificador "lambda" "("(arbno expresion)")" expresion) funcion)
     (expresion ("call" identificador "("(arbno expresion)")") call-funcion)
     (expresion ("set" identificador "=" expresion) set-exp) ;unparse hecho
-    (expresion ( "(" expresion (arbno expresion) ")")  app-exp)
+    (expresion ( "-(" expresion (arbno expresion) ")")  app-exp)
 
     ;primitivas de cadenas
     (cad-prim ("longitud"  "("expresion")") cadena-long)
