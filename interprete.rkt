@@ -44,7 +44,11 @@
   (empty-env)  ;función que crea un ambiente vacío
   (extended-env-record (syms (list-of symbol?))
                        (vec vector?)
-                       (env environment?)))
+                       (env environment?))
+   (recursively-extended-env-record (proc-names (list-of symbol?))
+                                   (idss (list-of (list-of symbol?)))
+                                   (bodies (list-of expresion?))
+                                   (env environment?)))
 
 ;empty-env:      -> enviroment
 ;función que crea un ambiente vacío
@@ -84,7 +88,21 @@
                            (let ((pos (list-find-position sym syms)))
                              (if (number? pos)
                                  (a-ref pos vec)
-                                 (apply-env-ref env sym)))))))
+                                 (apply-env-ref env sym))))
+  (recursively-extended-env-record (proc-names idss bodies old-env)
+                                       (let ((pos (list-find-position sym proc-names)))
+                                         (if (number? pos)
+                                             (closure (list-ref idss pos)
+                                                      (list-ref bodies pos)
+                                                      env)
+                                             (apply-env old-env sym)))))))
+
+;extend-env-recursively: <list-of symbols> <list-of <list-of symbols>> <list-of expressions> environment -> environment
+;función que crea un ambiente extendido para procedimientos recursivos
+(define extend-env-recursively
+  (lambda (proc-names idss bodies old-env)
+    (recursively-extended-env-record
+     proc-names idss bodies old-env)))
 
 
 ;Funciones auxiliares
@@ -118,13 +136,12 @@
    (env environment?)))
 
 ;apply-procedure: evalua el cuerpo de un procedimientos en el ambiente extendido correspondiente
+
 (define apply-procedure
   (lambda (proc args)
     (cases procval proc
       (closure (ids body env)
                (unparse-expresion body (extend-env ids args env))))))
-
-
 
 ;****************************************************************
 
@@ -150,6 +167,9 @@
       (ref-id-exp (id) (unparse-ref(apply-env-ref env id)))
       (var-exp (ids exps body)
                (unparse-expresion body  (set-env(extend-env ids (unparse-rands exps env) env))))
+      (rec-exp (proc-names idss bodies rec-body)
+               (unparse-expresion rec-body
+                                  (extend-env-recursively proc-names idss bodies env)))
       (c-vid-val-exp () "@value")
       (oct-exp (octal)  (cons 'x8 octal))
       (num-exp (num) num)
@@ -173,8 +193,13 @@
       (vec-exp (vector) vector)
       (reg-exp (registro) registro)
       ;(expr-bool-exp (expr-bool) expr-bool)
+      (seq-exp (exp1 exps)
+              (let loop ((acc (unparse-expresion exp1 env))
+                   (exps exps))
+          (if (null? exps) acc
+            (loop (unparse-expresion (car exps) env) (cdr exps)))) )
       (if-exp (test-exp true-exp false-exp)
-              (if (unparse-expresion test-exp env)
+              (if (true-value? (unparse-expresion test-exp env))
                   (unparse-expresion true-exp env)
                   (unparse-expresion false-exp env)))
       (app-exp (rator rands)

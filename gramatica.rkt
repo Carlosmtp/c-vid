@@ -151,7 +151,7 @@
                       ")" "in" expresion)
                var-exp) ;unparse hecho
     (expresion ("sta""("(separated-list identificador "=" expresion ",")")" "in" expresion) sta-exp)
-    (expresion ("rec" (arbno identificador "("(separated-list identificador ",")")" "=" expresion) "in" expresion) rec-exp)
+    (expresion ("rec" (arbno identificador "("(separated-list identificador ",")")" "=" expresion) "in" expresion) rec-exp) ;Verificar si esta bien
     (expresion ("@value") c-vid-val-exp)
     (expresion ("unic" "("(separated-list identificador "=" expresion ",")")" "in" expresion) unic-exp)
     (expresion ("(x8" (arbno numero) ")") oct-exp) ;unparse hecho
@@ -162,8 +162,8 @@
     (expresion (vect) vec-exp)
     (expresion (registro) reg-exp)
     (expresion (expr-bool) boolean-exp)
-    (expresion ("sequence" "(" expresion ";" (arbno expresion ";") ")" "end") seq-exp)
-    (expresion ("if" "(" expresion ")" "then" expresion "[" "else" expresion "]" "end") if-exp)
+    (expresion ("sequence" "(" expresion ";" (arbno expresion ";") ")" "end") seq-exp) ;verificar si esta bien
+    (expresion ("if" "(" expresion ")" "then" expresion "[" "else" expresion "]" "end") if-exp) ;Verificar si esta bien
     (expresion ("cond" (arbno "["expresion expresion"]") "else" expresion "end") cond-exp)
     (expresion ("while" "(" expresion ")" "do" expresion "done") while-exp)
     (expresion ("to") to-exp)
@@ -176,9 +176,8 @@
     (expresion (vect-prim) pred-vect)
     (expresion (reg-prim) pred-registro)
     (expresion ("define" identificador "lambda" "("(arbno expresion)")" expresion) funcion)
-    (expresion ("call" identificador "("(arbno expresion)")") call-funcion)
     (expresion ("set" identificador "=" expresion) set-exp) ;unparse hecho
-    (expresion ( "-(" expresion (arbno expresion) ")")  app-exp)
+    (expresion ( "-(" expresion (arbno expresion) ")")  app-exp);Verificar si esta bien
 
     ;primitivas de cadenas
     (cad-prim ("longitud"  "("expresion")") cadena-long)
