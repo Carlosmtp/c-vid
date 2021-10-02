@@ -95,7 +95,13 @@
                                              (closure (list-ref idss pos)
                                                       (list-ref bodies pos)
                                                       env)
-                                             (apply-env old-env sym)))))))
+                                             (apply-env-ref old-env sym)))))))
+
+(define declosure
+  (lambda (clo)
+    (cases procval clo
+        (closure (ids body env)
+                 body))))
 
 ;extend-env-recursively: <list-of symbols> <list-of <list-of symbols>> <list-of expressions> environment -> environment
 ;función que crea un ambiente extendido para procedimientos recursivos
@@ -149,6 +155,7 @@
 (define unparse-expresion
   (lambda (exp env)
     (if (number? exp) exp
+    (if (procval? exp) exp
     (cases expresion exp
       (glob-list-exp (ids exps body)
           (unparse-expresion body
@@ -158,7 +165,11 @@
                                   (unparse-rands exps env)
                                   env))
                              ))
-      (id-exp (id) (unparse-expresion(apply-env env id) env))
+      (id-exp (id)
+              (unparse-expresion
+               (let ([aux (apply-env-ref env id)])
+                 (if (reference? aux) (deref aux) aux))
+               env))
       (ref-id-exp (id) (unparse-ref(apply-env-ref env id)))
       (var-exp (ids exps body)
                (unparse-expresion body  (set-env(extend-env ids (unparse-rands exps env) env))))
@@ -206,7 +217,7 @@
                                  "Attempt to apply non-procedure ~s" proc))))
       (set-exp (id exp)
                (setref! (unparse-ref(apply-env-ref env id)) exp env))
-      (else 1)))));continuar!!!!
+      (else 1))))));continuar!!!!
 
 (define numlist->string
   (lambda (l)

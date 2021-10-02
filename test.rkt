@@ -4,7 +4,8 @@
 
 
 ;Pruebas
-
+;rec a (x, y) = :(3+4) in call(a 1 2)
+;rec fact (x) = if (compare (x > 0)) then :(x * call(fact :(x --))) [else 1] end in call(fact 6)
 ;programa con globales y una expresion
 (scan&parse "global () x")                                      ;id-exp
 (scan&parse "global () &x")                                     ;ref-id-exp
@@ -99,7 +100,7 @@
 ;pruebas con funciones
 ;función predicado
 (scan&parse
-   "global ()
+ "global ()
     define filtro
       lambda (lista pred)
          if (vacio? (lista))
@@ -115,7 +116,7 @@
 
 (scan&parse "global () call factorial (:(n - 1))") ;call-funcion
 (scan&parse          ;funcion
-   "global ()
+ "global ()
     define factorial
       lambda (n)
          cond
@@ -125,7 +126,7 @@
              end")
 
 (scan&parse          ;funcion
-   "global ()
+ "global ()
     rec factorial (n) = cond
              [compare (n == 0) 1]
              [compare (n == 1) 1]

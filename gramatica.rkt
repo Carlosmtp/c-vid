@@ -177,7 +177,7 @@
     (expresion (reg-prim) pred-registro)
     (expresion ("define" identificador "lambda" "("(arbno expresion)")" expresion) funcion)
     (expresion ("set" identificador "=" expresion) set-exp) ;unparse hecho
-    (expresion ( "-(" expresion (arbno expresion) ")")  app-exp);Verificar si esta bien
+    (expresion ( "call(" expresion (arbno expresion) ")")  app-exp);Verificar si esta bien
 
     ;primitivas de cadenas
     (cad-prim ("longitud"  "("expresion")") cadena-long)
