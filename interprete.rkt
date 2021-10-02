@@ -123,11 +123,6 @@
 
 
 
-;true-value?: determina si un valor dado corresponde a un valor booleano falso o verdadero
-(define true-value?
-  (lambda (x)
-    (not (zero? x))))
-
 ;Procedimientos
 (define-datatype procval procval?
   (closure
@@ -199,7 +194,7 @@
           (if (null? exps) acc
             (loop (unparse-expresion (car exps) env) (cdr exps)))) )
       (if-exp (test-exp true-exp false-exp)
-              (if (true-value? (unparse-expresion test-exp env))
+              (if (unparse-expresion test-exp env)
                   (unparse-expresion true-exp env)
                   (unparse-expresion false-exp env)))
       (app-exp (rator rands)
