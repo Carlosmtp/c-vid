@@ -27,8 +27,8 @@
              (vector-ref vec pos)))))
 
 (define setref!
-  (lambda (ref val)
-    (primitive-setref! ref val)))
+  (lambda (ref val env)
+    (primitive-setref! ref (unparse-expresion val env))))
 
 (define primitive-setref!
      (lambda (ref val)
@@ -205,7 +205,7 @@
                      (eopl:error 'eval-expresion
                                  "Attempt to apply non-procedure ~s" proc))))
       (set-exp (id exp)
-               (setref! (unparse-ref(apply-env-ref env id)) exp))
+               (setref! (unparse-ref(apply-env-ref env id)) exp env))
       (else 1)))));continuar!!!!
 
 (define numlist->string
