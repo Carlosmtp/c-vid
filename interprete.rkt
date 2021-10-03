@@ -364,8 +364,8 @@
       (suma-octal (expresion) (lambda(n) (sumaOctal n (cdr(unparse-expresion expresion env)))))
       (resta-octal (expresion) (lambda(n) (restaOctal n (cdr(unparse-expresion expresion env)))))
       (multiplicacion-octal (expresion) (lambda(n) (multiplicacionOctal n (cdr(unparse-expresion expresion env)))))
-      (aumentar-octal () (lambda(n) (+ n 1)))
-      (disminuir-octal () (lambda(n) (- n 1))))))
+      (aumentar-octal () (lambda(n) (successor n )))
+      (disminuir-octal () (lambda(n) (predecessor  n))))))
 
 (define unparse-oper-bin-bool
   (lambda (oper)
