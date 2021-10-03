@@ -170,6 +170,7 @@
       [(number? exp) exp]
       [(procval? exp) exp]
       [(vector? exp) exp]
+      [(list? exp) exp]
       [else
     (cases expresion exp
       (glob-list-exp (ids exps body)
@@ -217,7 +218,8 @@
       (pred-list (lprim e) (unparse-list-prim lprim (unparse-expresion e env)))
       (vec-exp (vector) (unparse-vec vector env))
       (pred-vect (vect-prim) (unparse-vect-prim vect-prim env))
-      (reg-exp (registro) registro)
+      (reg-exp (registro) (unparse-reg registro env))
+      (pred-registro (reg-prim) (unparse-reg-prim reg-prim env))
       (seq-exp (exp1 exps)
               (let loop ((acc (unparse-expresion exp1 env))
                    (exps exps))
@@ -335,7 +337,7 @@
       (lista-pred (lst) (list? (unparse-expresion lst env)))
       (lista-vacia-pred (lst) (null? (unparse-expresion lst env)))
       (vect-pred (vec)(vector? (unparse-expresion vec env)))
-      (else -2))))
+      (registro-pred (reg) 0))))
 
 (define unparse-vec
   (lambda (v env)
@@ -347,37 +349,58 @@
     (cases vect-prim v
       (vect-ref (n vec)
                 (vector-ref (unparse-expresion vec env) n))
-      (vect-set (val n vec) (begin
-                (vector-set!
-                 (unparse-expresion vec env)
-                 n
-                 (unparse-expresion val env))
-                (unparse-expresion vec env))
+      (vect-set (val n vec)
+                  (vector-set!
+                    (unparse-expresion vec env)
+                    n
+                    (unparse-expresion val env))
       ))))
+
+(define unparse-reg
+  (lambda (reg env)
+    (cases registro reg
+      (regist (ids vals)
+              (list
+               ids
+               (list->vector (map (lambda (i) (unparse-expresion i env)) vals)))
+      ))))
+
+(define unparse-reg-prim
+  (lambda (reg env)
+    (cases reg-prim reg
+      (registro-ref (id re)
+              (let ([r (unparse-expresion re env)] )
+                  (vector-ref (cadr r) (list-find-position id (car r)))
+      ))
+      (registro-set (val id re)
+                    (let ([r (unparse-expresion re env)] )
+                  (vector-set! (cadr r) (list-find-position id (car r)) (unparse-expresion val env))
+      )))))
+
 (define unparse-arit-prim
   (lambda (prim env)
     (cases arit-prim prim
-      (suma (expresion) (lambda(n) (+ n (unparse-expresion expresion env))))
+      (suma (expresion)  (lambda(n) (+ n (unparse-expresion expresion env))))
       (resta (expresion) (lambda(n) (- n (unparse-expresion expresion env))))
       (multiplicacion (expresion) (lambda(n) (* n (unparse-expresion expresion env))))
-      (division (expresion) (lambda(n) (/ n (unparse-expresion expresion env))))
-      (aumentar () (lambda(n) (+ n 1)))
+      (division       (expresion) (lambda(n) (/ n (unparse-expresion expresion env))))
+      (aumentar  () (lambda(n) (+ n 1)))
       (disminuir () (lambda(n) (- n 1))))))
 
 (define unparse-arit-prim-octal
   (lambda (prim env)
     (cases arit-prim-octal prim
-      (suma-octal (expresion) (lambda(n) (sumaOctal n (cdr(unparse-expresion expresion env)))))
+      (suma-octal  (expresion) (lambda(n) (sumaOctal n (cdr(unparse-expresion expresion env)))))
       (resta-octal (expresion) (lambda(n) (restaOctal n (cdr(unparse-expresion expresion env)))))
       (multiplicacion-octal (expresion) (lambda(n) (multiplicacionOctal n (cdr(unparse-expresion expresion env)))))
-      (aumentar-octal () (lambda(n) (successor n )))
+      (aumentar-octal  () (lambda(n) (successor n )))
       (disminuir-octal () (lambda(n) (predecessor  n))))))
 
 (define unparse-oper-bin-bool
   (lambda (oper)
     (cases oper-bin-bool oper
       (and-oper () (lambda (p q) (and p q)))
-      (or-oper () (lambda (p q) (or p q)))
+      (or-oper  () (lambda (p q) (or p q)))
       (xor-oper () (lambda (p q) (not (equal? p q)))))))
 
 ; funciones auxiliares para aplicar unparse-expresion a cada elemento de una 

@@ -202,12 +202,12 @@
     (vect-prim ("set-vect" "("expresion "en" numero "de" expresion")") vect-set) ;unparse hecho
 
     ;---------- REGISTROS -----------
-    (registro ( "{" identificador ":" expresion  (arbno "," identificador ":" expresion) "}" ) regist)
+    (registro ( "{" (separated-list identificador ":" expresion ",") "}" ) regist)
 
     ;primitivas de registros
     (expr-bool ("registro?" "("expresion")") registro-pred)
-    (reg-prim ("ref-registro" "("identificador "de" expresion")") registro-ref)
-    (reg-prim ("set-registro" "("expresion "en" identificador "de" expresion")") registro-set)
+    (reg-prim ("ref-reg" "("identificador "de" expresion")") registro-ref)
+    (reg-prim ("set-reg" "("expresion "en" identificador "de" expresion")") registro-set)
 
     ;---------- BOOLEANOS -----------
     ;expresiones booleanas
