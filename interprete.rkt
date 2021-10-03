@@ -58,7 +58,7 @@
 
 ;crea un vector que contiene el ambiente del programa
 (define env-programa
- (vector (init-env)))
+ (vector (init-env) '()))
 
 ;actualiza el ambiente del programa contenido en el vector env-programa
 (define set-env
@@ -67,6 +67,24 @@
     (vector-set! env-programa 0 v)
     (vector-ref env-programa 0))))
 
+(define set-env-sta
+  (lambda (ids v)
+    (set-env-sta-aux ids)
+    (vector-set! env-programa 0 v)
+    (vector-ref env-programa 0)))
+
+(define set-env-sta-aux
+  (lambda (ids)
+    (cond
+      [(null? ids) 0]
+      [(list-find-position (car ids) (vector-ref env-programa 1))
+        (eopl:error 'static "~s is static and cannot be changed." (car ids))]
+      [else
+        (begin
+          (vector-set! env-programa 1 (cons (car ids) (vector-ref env-programa 1)))
+          (set-env-sta-aux (cdr ids))
+          )]
+      )))
 
 ;extend-env: <list-of symbols> <list-of numbers> enviroment -> enviroment
 ;función que crea un ambiente extendido
@@ -89,7 +107,7 @@
                              (if (number? pos)
                                  (a-ref pos vec)
                                  (apply-env-ref env sym))))
-  (recursively-extended-env-record (proc-names idss bodies old-env)
+      (recursively-extended-env-record (proc-names idss bodies old-env)
                                        (let ((pos (list-find-position sym proc-names)))
                                          (if (number? pos)
                                              (closure (list-ref idss pos)
@@ -167,6 +185,8 @@
       (ref-id-exp (id) (unparse-ref(apply-env-ref env id)))
       (var-exp (ids exps body)
                (unparse-expresion body  (set-env(extend-env ids (unparse-rands exps env) env))))
+      (sta-exp (ids vals body)
+               (unparse-expresion body  (set-env-sta ids (extend-env ids (unparse-rands vals env) env))))
       (rec-exp (proc-names idss bodies rec-body)
                (unparse-expresion rec-body
                                   (extend-env-recursively proc-names idss bodies env)))

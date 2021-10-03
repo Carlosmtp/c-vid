@@ -6,6 +6,8 @@
 ;Pruebas
 ;rec a (x, y) = :(3+4) in call(a 1 2)
 ;rec fact (x) = if (compare (x > 0)) then :(x * call(fact :(x --))) [else 1] end in call(fact 6)
+;rec a (x, y) = :(x+y) b (f, j) = :(f+j) in :(call(a 1 2) + call(b 3 4)) 
+
 ;programa con globales y una expresion
 (scan&parse "global () x")                                      ;id-exp
 (scan&parse "global () &x")                                     ;ref-id-exp
