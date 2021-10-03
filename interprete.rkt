@@ -204,7 +204,7 @@
       (true-exp () #t)
       (false-exp () #f)
       (bool-comp-exp (num1 pred num2)
-                     ((unparse-pred-prim pred)
+                     ((unparse-pred-prim pred env)
                       (unparse-expresion num1 env)
                       (unparse-expresion num2 env)))
       (bool-oper-exp (oper exp1 exp2)
@@ -290,15 +290,21 @@
       (a-ref (pos vec) (a-ref pos vec)))))
 
 (define unparse-pred-prim
-  (lambda (boolprim)
+  (lambda (boolprim env)
     (cases pred-prim boolprim
     (menor () <) 
     (mayor () >)
     (menor-igual () <=)
     (mayor-igual () >=)
     (igual () equal?)
-    (entre () (lambda (n i f)
-                (and (>= n i) (<= n f)))))))
+    (entre-cerrado (n)(lambda (i f)
+                (and (>=
+                      (unparse-expresion n env) i)
+                     (<= (unparse-expresion n env) f))))
+    (entre-abierto (n) (lambda (i f)
+                (and (>
+                      (unparse-expresion n env) i)
+                     (< (unparse-expresion n env) f)))))))
 
 (define unparse-list
   (lambda (lst env)

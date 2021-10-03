@@ -232,7 +232,8 @@
     (pred-prim ("<=") menor-igual) ;unparse hecho
     (pred-prim (">=") mayor-igual) ;unparse hecho
     (pred-prim ("==") igual) ;unparse hecho
-    (pred-prim ("<>") entre) ;
+    (pred-prim ("<[" expresion "]<") entre-cerrado)
+    (pred-prim ("<(" expresion ")<") entre-abierto)
 
     ;---------- ARITMETICA -----------
     (expresion (":" "(" expresion arit-prim")") oper-exp)
