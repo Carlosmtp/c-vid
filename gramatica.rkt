@@ -248,11 +248,11 @@
 
     (expresion ("o:" "(" expresion arit-prim-octal")") oper-exp-oct)
     ;primitivas aritmeticas para octales
-    (arit-prim-octal ("+" expresion) suma-octal)
-    (arit-prim-octal ("-" expresion) resta-octal)
-    (arit-prim-octal ("*" expresion) multiplicacion-octal)
-    (arit-prim-octal ("++") aumentar-octal)    
-    (arit-prim-octal ("--") disminuir-octal)
+    (arit-prim-octal ("+" expresion) suma-octal) ;unparse hecho
+    (arit-prim-octal ("-" expresion) resta-octal) ;unparse hecho
+    (arit-prim-octal ("*" expresion) multiplicacion-octal) ;unparse hecho
+    (arit-prim-octal ("++") aumentar-octal) ;unparse hecho
+    (arit-prim-octal ("--") disminuir-octal) ;unparse hecho
  )
 )
 ;o:(x8(1)+ x8(2))
