@@ -158,52 +158,51 @@
     (expresion (numero) num-exp) ;unparse hecho
     (expresion (caracter) cara-exp) ;unparse hecho
     (expresion (cadena) cad-exp)
-    (expresion (lista) list-exp) 
-    (expresion (vect) vec-exp)
+    (expresion (lista) list-exp) ;unparse hecho
+    (expresion (vect) vec-exp) ;unparse hecho
     (expresion (registro) reg-exp)
-    (expresion (expr-bool) boolean-exp)
     (expresion ("sequence" "(" expresion ";" (arbno expresion ";") ")" "end") seq-exp) ;unparse hecho
     (expresion ("if" "(" expresion ")" "then" expresion "[" "else" expresion "]" "end") if-exp) ;unparse hecho
-    (expresion ("cond" (arbno "["expresion expresion"]") "else" expresion "end") cond-exp)
+    (expresion ("cond" (arbno "["expresion expresion"]") "else" expresion "end") cond-exp) 
     (expresion ("while" "(" expresion ")" "do" expresion "done") while-exp) ;unparse hecho
     (expresion ("for" "(" identificador "=" expresion for-prim expresion ")" "do" expresion "done") for-exp) ;unparse hecho
 
     ;expresiones adicionales 
     (expresion (cad-prim) pred-cadena)
-    (expresion (list-prim "(" expresion ")") pred-list)
-    (expresion (vect-prim) pred-vect)
+    (expresion (list-prim "(" expresion ")") pred-list) ;unparse hecho
+    (expresion (vect-prim) pred-vect) ;unparse hecho
     (expresion (reg-prim) pred-registro)
     (expresion ("define" identificador "lambda" "("(arbno expresion)")" expresion) funcion)
     (expresion ("set" identificador "=" expresion) set-exp) ;unparse hecho
     (expresion ("call(" expresion (arbno expresion) ")")  app-exp) ;unparse hecho
 
     ;primitivas de for
-    (for-prim ("to") to-exp)
-    (for-prim ("downto") downto-exp)
+    (for-prim ("to") to-exp) ;unparse hecho
+    (for-prim ("downto") downto-exp) ;unparse hecho
     
     ;primitivas de cadenas
     (cad-prim ("longitud"  "("expresion")") cadena-long)
     (cad-prim ("concatenar" "("(separated-list expresion ",")")") cadena-con)
     
     ;---------- LISTAS -----------
-    (lista ("["(separated-list expresion ";")"]") list-e)
-    (lista ("vacia") empt-list)
-    (lista ("cons" "("expresion expresion")") cons-list)
-    (lista ("append" "("expresion expresion")") append-list)
+    (lista ("["(separated-list expresion ";")"]") list-e) ;unparse hecho
+    (lista ("vacia") empt-list) ;unparse hecho
+    (lista ("cons" "("expresion expresion")") cons-list) ;unparse hecho
+    (lista ("append" "("expresion expresion")") append-list) ;unparse hecho
     
     ;primitivas de listas
-    (expr-bool ("lista?" "("expresion")" ) lista-pred)
-    (expr-bool ("vacio?" "("expresion")" ) lista-vacia-pred)
-    (list-prim ("cabeza") lista-cabeza)
-    (list-prim ("cola") lista-cola)
+    (expr-bool ("lista?" "("expresion")" ) lista-pred) ;unparse hecho
+    (expr-bool ("vacio?" "("expresion")" ) lista-vacia-pred) ;unparse hecho
+    (list-prim ("cabeza") lista-cabeza) ;unparse hecho
+    (list-prim ("cola") lista-cola) ;unparse hecho
 
     ;---------- VECTORES -----------
-    (vect ("vec" "["(separated-list expresion ";")"]") vec)
+    (vect ("vec" "["(separated-list expresion ";")"]") vec) ;unparse hecho
     
     ;primitivas de vectores
-    (expr-bool ("vect?" "("expresion")") vect-pred)
-    (vect-prim ("ref-vect" "("numero "de" expresion")") vect-ref)
-    (vect-prim ("set-vect" "("expresion "en" numero "de" expresion")") vect-set)
+    (expr-bool ("vect?" "("expresion")") vect-pred) ;unparse hecho
+    (vect-prim ("ref-vect" "("numero "de" expresion")") vect-ref) ;unparse hecho
+    (vect-prim ("set-vect" "("expresion "en" numero "de" expresion")") vect-set) ;unparse hecho
 
     ;---------- REGISTROS -----------
     (registro ( "{" identificador ":" expresion  (arbno "," identificador ":" expresion) "}" ) regist)
@@ -215,36 +214,36 @@
 
     ;---------- BOOLEANOS -----------
     ;expresiones booleanas
-    (expresion ("true") true-exp)
-    (expresion ("false") false-exp)
-    (expresion ("compare" "(" expresion pred-prim expresion ")" ) bool-comp-exp)
-    (expresion (oper-bin-bool "(" expresion "," expresion ")") bool-oper-exp)
-    (expresion ("¿"expresion expresion) pred-bool-exp)
-    (expresion ("not" "(" expresion ")") not-bool-exp)
+    (expresion ("true") true-exp) ;unparse hecho
+    (expresion ("false") false-exp) ;unparse hecho
+    (expresion ("compare" "(" expresion pred-prim expresion ")" ) bool-comp-exp) ;unparse hecho
+    (expresion (oper-bin-bool "(" expresion "," expresion ")") bool-oper-exp) ;unparse hecho
+    (expresion ("¿"expr-bool) pred-bool-exp) ;unparse hecho
+    (expresion ("not" "(" expresion ")") not-bool-exp) ;unparse hecho
 
     ;operadores booleanos
-    (oper-bin-bool ("and") and-oper)
-    (oper-bin-bool ("or") or-oper)
-    (oper-bin-bool ("xor") xor-oper)
+    (oper-bin-bool ("and") and-oper) ;unparse hecho
+    (oper-bin-bool ("or") or-oper) ;unparse hecho
+    (oper-bin-bool ("xor") xor-oper) ;unparse hecho
     
     ;predicado de primitivas
-    (pred-prim ("<") menor)
-    (pred-prim (">") mayor)
-    (pred-prim ("<=") menor-igual)
-    (pred-prim (">=") mayor-igual)
-    (pred-prim ("==") igual)
-    (pred-prim ("<>") entre)
+    (pred-prim ("<") menor) ;unparse hecho
+    (pred-prim (">") mayor) ;unparse hecho
+    (pred-prim ("<=") menor-igual) ;unparse hecho
+    (pred-prim (">=") mayor-igual) ;unparse hecho
+    (pred-prim ("==") igual) ;unparse hecho
+    (pred-prim ("<>") entre) ;
 
     ;---------- ARITMETICA -----------
     (expresion (":" "(" expresion arit-prim")") oper-exp)
     
     ;primitivas aritmeticas para decimales
-    (arit-prim ("+" expresion) suma)
-    (arit-prim ("~" expresion) resta)
-    (arit-prim ("*" expresion) multiplicacion)
-    (arit-prim ("/" expresion) division)
-    (arit-prim ("++") aumentar)    
-    (arit-prim ("--") disminuir)
+    (arit-prim ("+" expresion) suma) ;unparse hecho
+    (arit-prim ("~" expresion) resta) ;unparse hecho
+    (arit-prim ("*" expresion) multiplicacion) ;unparse hecho
+    (arit-prim ("/" expresion) division) ;unparse hecho
+    (arit-prim ("++") aumentar) ;unparse hecho
+    (arit-prim ("--") disminuir) ;unparse hecho
 
     (expresion ("o:" "(" expresion arit-prim-octal")") oper-exp-oct)
     ;primitivas aritmeticas para octales

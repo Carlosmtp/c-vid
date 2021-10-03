@@ -3,10 +3,7 @@
 (require "./interprete.rkt")
 
 
-;Pruebas
-;rec a (x, y) = :(3+4) in call(a 1 2)
-;rec fact (x) = if (compare (x > 0)) then :(x * call(fact :(x --))) [else 1] end in call(fact 6)
-;rec a (x, y) = :(x+y) b (f, j) = :(f+j) in :(call(a 1 2) + call(b 3 4)) 
+;Pruebas 
 
 ;programa con globales y una expresion
 (scan&parse "global () x")                                      ;id-exp
@@ -137,3 +134,28 @@
         in (factorial 5)")
 
 
+; Pruebas en el intérprete
+;(ejecutar en el intérprete)
+
+;rec a (x, y) = :(3+4) in call(a 1 2)
+;rec fact (x) = if (compare (x > 0)) then :(x * call(fact :(x --))) [else 1] end in call(fact 6)
+;rec a (x, y) = :(x+y) b (f, j) = :(f+j) in :(call(a 1 2) + call(b 3 4))
+
+;[]
+;[1]
+;[1;2;3]
+;vacia
+;cons (1 [2;3;4])
+;append ([1;2][2;3;5;6])
+;append ([1;2] append([2;3][5;6]))
+;¿lista? (append ([1;2] cons(2 [5;6])))
+;¿vacio? (vacia)
+;¿vacio? ([2])
+;cabeza (append ([1;2] cons(2 [5;6])))
+;cola (append ([1;2] cons(2 [5;6])))
+
+;vec[2;3]
+;¿vect?(vec[2])
+;¿vect?(38)
+;ref-vect(2 de vec[0;1;2;3;4])
+;global (x = vec[0;1;2;3;4]) set-vect(99 en 2 de x)

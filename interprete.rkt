@@ -166,8 +166,11 @@
 
 (define unparse-expresion
   (lambda (exp env)
-    (if (number? exp) exp
-    (if (procval? exp) exp
+    (cond
+      [(number? exp) exp]
+      [(procval? exp) exp]
+      [(vector? exp) exp]
+      [else
     (cases expresion exp
       (glob-list-exp (ids exps body)
           (unparse-expresion body
@@ -209,9 +212,11 @@
                       (unparse-expresion exp1 env)
                       (unparse-expresion exp2 env)))
       (not-bool-exp (bool-value) (not (unparse-expresion bool-value env)))
-      (list-exp (lista) lista)
-      (boolean-exp (exp-bool) exp-bool)
-      (vec-exp (vector) vector)
+      (pred-bool-exp (expr-bool) (unparse-expr-bool expr-bool env))
+      (list-exp (lista) (unparse-list lista env))
+      (pred-list (lprim e) (unparse-list-prim lprim (unparse-expresion e env)))
+      (vec-exp (vector) (unparse-vec vector env))
+      (pred-vect (vect-prim) (unparse-vect-prim vect-prim env))
       (reg-exp (registro) registro)
       (seq-exp (exp1 exps)
               (let loop ((acc (unparse-expresion exp1 env))
@@ -235,7 +240,7 @@
                                  "Attempt to apply non-procedure ~s" proc))))
       (set-exp (id exp)
                (setref! (unparse-ref(apply-env-ref env id)) exp env))
-      (else 1))))));continuar!!!!
+      (else -1))])));continuar!!!!
 
 (define while-aux
   (lambda (con body env)
@@ -295,12 +300,54 @@
     (entre () (lambda (n i f)
                 (and (>= n i) (<= n f)))))))
 
-(define unparse-expr-bool
-  (lambda (exp)
-    (cases expr-bool exp
-      (lista-pred (list) (lambda (n) #f))
-      (else 0))))
+(define unparse-list
+  (lambda (lst env)
+    (cases lista lst
+      (list-e (elems) (map (lambda (i) (unparse-expresion i env)) elems))
+      (empt-list () '())
+      (cons-list (e l)
+                 (cons (unparse-expresion e env)
+                       (unparse-expresion l env)))
+      (append-list (l1 l2)
+                   (append (unparse-expresion l1 env)
+                           (unparse-expresion l2 env)))
+      )
+    ))
+(define unparse-list-prim
+  (lambda (lprim exp)
+    (if (null? exp) '()
+    (cases list-prim lprim
+      (lista-cabeza () (car exp))
+      (lista-cola () (if (null? (cdr exp))
+                         (car exp)
+                         (unparse-list-prim lprim (cdr exp))))
+      ))))
 
+(define unparse-expr-bool
+  (lambda (exp env)
+    (cases expr-bool exp
+      (lista-pred (lst) (list? (unparse-expresion lst env)))
+      (lista-vacia-pred (lst) (null? (unparse-expresion lst env)))
+      (vect-pred (vec)(vector? (unparse-expresion vec env)))
+      (else -2))))
+
+(define unparse-vec
+  (lambda (v env)
+    (cases vect v
+      (vec (elems) (list->vector (map (lambda (i) (unparse-expresion i env)) elems))))))
+
+(define unparse-vect-prim
+  (lambda (v env)
+    (cases vect-prim v
+      (vect-ref (n vec)
+                (vector-ref (unparse-expresion vec env) n))
+      (vect-set (val n vec) (begin
+                (vector-set!
+                 (unparse-expresion vec env)
+                 n
+                 (unparse-expresion val env))
+                (unparse-expresion vec env))
+      ))))
 (define unparse-arit-prim
   (lambda (prim env)
     (cases arit-prim prim
