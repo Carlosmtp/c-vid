@@ -223,6 +223,7 @@
     (arit-prim ("++") aumentar) ;unparse hecho
     (arit-prim ("--") disminuir) ;unparse hecho
 
+    ;------- ARITMETICA OCTAL --------
     (expresion ("o:" "(" expresion arit-prim-octal")") oper-exp-oct)
     ;primitivas aritmeticas para octales
     (arit-prim-octal ("+" expresion) suma-octal) ;unparse hecho
@@ -232,7 +233,7 @@
     (arit-prim-octal ("--") disminuir-octal) ;unparse hecho
  )
 )
-;o:(x8(1)+ x8(2))
+
 ;*******************************************************************************************
 ;Tipos de datos para la sintaxis abstracta de la gramática
 
