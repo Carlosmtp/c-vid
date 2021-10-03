@@ -210,9 +210,9 @@
                       (unparse-expresion exp2 env)))
       (not-bool-exp (bool-value) (not (unparse-expresion bool-value env)))
       (list-exp (lista) lista)
+      (boolean-exp (exp-bool) exp-bool)
       (vec-exp (vector) vector)
       (reg-exp (registro) registro)
-      ;(expr-bool-exp (expr-bool) expr-bool)
       (seq-exp (exp1 exps)
               (let loop ((acc (unparse-expresion exp1 env))
                    (exps exps))
@@ -294,6 +294,12 @@
     (igual () equal?)
     (entre () (lambda (n i f)
                 (and (>= n i) (<= n f)))))))
+
+(define unparse-expr-bool
+  (lambda (exp)
+    (cases expr-bool exp
+      (lista-pred (list) (lambda (n) #f))
+      (else 0))))
 
 (define unparse-arit-prim
   (lambda (prim env)
