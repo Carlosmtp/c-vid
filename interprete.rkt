@@ -204,7 +204,7 @@
       (true-exp () #t)
       (false-exp () #f)
       (bool-comp-exp (num1 pred num2)
-                     ((unparse-pred-prim pred)
+                     ((unparse-pred-prim pred env)
                       (unparse-expresion num1 env)
                       (unparse-expresion num2 env)))
       (bool-oper-exp (oper exp1 exp2)
@@ -290,15 +290,21 @@
       (a-ref (pos vec) (a-ref pos vec)))))
 
 (define unparse-pred-prim
-  (lambda (boolprim)
+  (lambda (boolprim env)
     (cases pred-prim boolprim
     (menor () <) 
     (mayor () >)
     (menor-igual () <=)
     (mayor-igual () >=)
     (igual () equal?)
-    (entre () (lambda (n i f)
-                (and (>= n i) (<= n f)))))))
+    (entre-cerrado (n)(lambda (i f)
+                (and (>=
+                      (unparse-expresion n env) i)
+                     (<= (unparse-expresion n env) f))))
+    (entre-abierto (n) (lambda (i f)
+                (and (>
+                      (unparse-expresion n env) i)
+                     (< (unparse-expresion n env) f)))))))
 
 (define unparse-list
   (lambda (lst env)
@@ -364,8 +370,8 @@
       (suma-octal (expresion) (lambda(n) (sumaOctal n (cdr(unparse-expresion expresion env)))))
       (resta-octal (expresion) (lambda(n) (restaOctal n (cdr(unparse-expresion expresion env)))))
       (multiplicacion-octal (expresion) (lambda(n) (multiplicacionOctal n (cdr(unparse-expresion expresion env)))))
-      (aumentar-octal () (lambda(n) (+ n 1)))
-      (disminuir-octal () (lambda(n) (- n 1))))))
+      (aumentar-octal () (lambda(n) (successor n )))
+      (disminuir-octal () (lambda(n) (predecessor  n))))))
 
 (define unparse-oper-bin-bool
   (lambda (oper)
