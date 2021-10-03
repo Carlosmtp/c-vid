@@ -166,9 +166,7 @@
     (expresion ("if" "(" expresion ")" "then" expresion "[" "else" expresion "]" "end") if-exp) ;Verificar si esta bien
     (expresion ("cond" (arbno "["expresion expresion"]") "else" expresion "end") cond-exp)
     (expresion ("while" "(" expresion ")" "do" expresion "done") while-exp)
-    (expresion ("to") to-exp)
-    (expresion ("downto") downto-exp)
-    (expresion ("for" "(" identificador "=" expresion expresion expresion ")" "do" expresion "done") for-to-exp)
+    (expresion ("for" "(" identificador "=" expresion for-prim expresion ")" "do" expresion "done") for-exp)
 
     ;expresiones adicionales 
     (expresion (cad-prim) pred-cadena)
@@ -179,6 +177,10 @@
     (expresion ("set" identificador "=" expresion) set-exp) ;unparse hecho
     (expresion ( "call(" expresion (arbno expresion) ")")  app-exp);Verificar si esta bien
 
+    ;primitivas de for
+    (for-prim ("to") to-exp)
+    (for-prim ("downto") downto-exp)
+    
     ;primitivas de cadenas
     (cad-prim ("longitud"  "("expresion")") cadena-long)
     (cad-prim ("concatenar" "("(separated-list expresion ",")")") cadena-con)

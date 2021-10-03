@@ -97,12 +97,6 @@
                                                       env)
                                              (apply-env-ref old-env sym)))))))
 
-(define declosure
-  (lambda (clo)
-    (cases procval clo
-        (closure (ids body env)
-                 body))))
-
 ;extend-env-recursively: <list-of symbols> <list-of <list-of symbols>> <list-of expressions> environment -> environment
 ;función que crea un ambiente extendido para procedimientos recursivos
 (define extend-env-recursively
@@ -202,12 +196,16 @@
       (seq-exp (exp1 exps)
               (let loop ((acc (unparse-expresion exp1 env))
                    (exps exps))
-          (if (null? exps) acc
-            (loop (unparse-expresion (car exps) env) (cdr exps)))) )
+                (if (null? exps) acc
+                    (loop (unparse-expresion (car exps) env) (cdr exps)))) )
       (if-exp (test-exp true-exp false-exp)
               (if (unparse-expresion test-exp env)
                   (unparse-expresion true-exp env)
                   (unparse-expresion false-exp env)))
+      (while-exp (condition body)
+                 (while-aux condition body env))
+      (for-exp (id exp1 prim exp2 body)
+               (for-aux id exp1 prim exp2 body (extend-env (list id) (list (unparse-expresion exp1 env)) env)))
       (app-exp (rator rands)
                (let ((proc (unparse-expresion rator env))
                      (args (unparse-rands rands env)))
@@ -219,6 +217,32 @@
                (setref! (unparse-ref(apply-env-ref env id)) exp env))
       (else 1))))));continuar!!!!
 
+(define while-aux
+  (lambda (con body env)
+    (if (unparse-expresion con env)
+        (begin
+          (unparse-expresion body env)
+          (while-aux con body env))
+        '())))
+
+(define for-aux
+  (lambda (id exp1 prim exp2 body env)    
+    (cond
+      [(equal? (unparse-for-prim prim) "to")
+         (if (< (apply-env env id)(unparse-expresion exp2 env))
+             (begin
+               (unparse-expresion body env)
+               (setref! (unparse-ref(apply-env-ref env id)) (+ (unparse-expresion exp1 env) 1) env)
+               (for-aux id (apply-env env id) prim exp2 body env))
+             '())]
+      [(equal? (unparse-for-prim prim) "downto")
+         (if (> (apply-env env id)(unparse-expresion exp2 env))
+             (begin
+               (unparse-expresion body env)
+               (setref! (unparse-ref(apply-env-ref env id)) (- (unparse-expresion exp1 env) 1) env)
+               (for-aux id (apply-env env id) prim exp2 body env))
+             '())])))
+
 (define numlist->string
   (lambda (l)
     (cond
@@ -229,6 +253,11 @@
              " "
              (numlist->string (cdr l)))]
       )))
+(define unparse-for-prim
+  (lambda (prim)
+    (cases for-prim prim
+      (to-exp () "to")
+      (downto-exp () "downto"))))
 
 (define unparse-ref
   (lambda (ref)
