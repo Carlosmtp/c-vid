@@ -14,7 +14,11 @@
 ; Referencias
 (define-datatype reference reference?
   (a-ref (position integer?)
-         (vec vector?)))
+         (vec vector?))
+  (closure
+   (ids (list-of symbol?))
+   (body expresion?)
+   (env environment?)))
 
 (define deref
   (lambda (ref)
@@ -24,8 +28,11 @@
   (lambda (ref)
     (cases reference ref
       (a-ref (pos vec)
-             (vector-ref vec pos)))))
-
+             (vector-ref vec pos))
+      (closure (ids body env)
+               ((unparse-expresion body env) ids env))
+      )))
+;rec a (x, y) = true in call a (1 2)
 (define setref!
   (lambda (ref val env)
     (primitive-setref! ref (unparse-expresion val env))))
@@ -34,7 +41,8 @@
      (lambda (ref val)
        (cases reference ref
          (a-ref (pos vec)
-                (vector-set! vec pos val)))))
+                (vector-set! vec pos val))
+         (else 1))))
 
 
 ;Ambientes
@@ -45,7 +53,7 @@
   (extended-env-record (syms (list-of symbol?))
                        (vec vector?)
                        (env environment?))
-   (recursively-extended-env-record (proc-names (list-of symbol?))
+  (recursively-extended-env-record (proc-names (list-of symbol?))
                                    (idss (list-of (list-of symbol?)))
                                    (bodies (list-of expresion?))
                                    (env environment?)))
@@ -142,19 +150,16 @@
 
 
 ;Procedimientos
-(define-datatype procval procval?
-  (closure
-   (ids (list-of symbol?))
-   (body expresion?)
-   (env environment?)))
+
 
 ;apply-procedure: evalua el cuerpo de un procedimientos en el ambiente extendido correspondiente
 
 (define apply-procedure
   (lambda (proc args)
-    (cases procval proc
+    (cases reference proc
       (closure (ids body env)
-               (unparse-expresion body (extend-env ids args env))))))
+               (unparse-expresion body (extend-env ids args env)))
+      (else 1))))
 
 ;****************************************************************
 
@@ -234,7 +239,7 @@
       (app-exp (rator rands)
                (let ((proc (unparse-expresion rator env))
                      (args (unparse-rands rands env)))
-                 (if (procval? proc)
+                 (if (reference? proc)
                      (apply-procedure proc args)
                      (eopl:error 'eval-expresion
                                  "Attempt to apply non-procedure ~s" proc))))
@@ -287,7 +292,8 @@
 (define unparse-ref
   (lambda (ref)
     (cases reference ref
-      (a-ref (pos vec) (a-ref pos vec)))))
+      (a-ref (pos vec) (a-ref pos vec))
+      (closure 1))))
 
 (define unparse-pred-prim
   (lambda (boolprim)
