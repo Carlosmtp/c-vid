@@ -137,7 +137,6 @@
 (define gramatica
   '(
     (programa (expresion) un-programa)
-
     ;producciones de tipo expresión
     (expresion
      ("global" "("
@@ -166,8 +165,6 @@
     (expresion ("cond" (arbno "["expresion expresion"]") "else" expresion "end") cond-exp) 
     (expresion ("while" "(" expresion ")" "do" expresion "done") while-exp) ;unparse hecho
     (expresion ("for" "(" identificador "=" expresion for-prim expresion ")" "do" expresion "done") for-exp) ;unparse hecho
-
-    ;expresiones adicionales 
     (expresion (cad-prim) pred-cadena)
     (expresion (list-prim "(" expresion ")") pred-list) ;unparse hecho
     (expresion (vect-prim) pred-vect) ;unparse hecho
