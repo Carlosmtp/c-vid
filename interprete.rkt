@@ -1,8 +1,14 @@
 #lang eopl
 (provide (all-defined-out))
 (require "./gramatica.rkt")
+;Proyecto Final: Fundamentos de Lenguajes de Programación
+;
+;Desarrolladores:
+;;Diana Katherine Toro Ortiz - 2110046
+;;Carlos Mauricio Tovar Parra - 1741699
+;;Nicolás Jaramillo Mayor - 1840558
 
-;El intérprete
+;------------------------------------------INTERPRETE---------------------------------------
 
 (define interpreter
   (sllgen:make-rep-loop "--> "
@@ -11,7 +17,8 @@
                          lexica
                          gramatica)))
 
-; Referencias
+
+;------------------------------------------REFERENCIAS---------------------------------------
 (define-datatype reference reference?
   (a-ref (position integer?)
          (vec vector?)))
@@ -37,7 +44,7 @@
                 (vector-set! vec pos val)))))
 
 
-;Ambientes
+;------------------------------------------AMBIENTES---------------------------------------
 
 ;definición del tipo de dato ambiente
 (define-datatype environment environment?
@@ -123,7 +130,7 @@
      proc-names idss bodies old-env)))
 
 
-;Funciones auxiliares
+;Funciones auxiliares ambientes
 
 (define list-find-position
   (lambda (sym los)
@@ -141,7 +148,7 @@
 
 
 
-;Procedimientos
+;------------------------------------------PROCEDIMIENTOS---------------------------------------
 (define-datatype procval procval?
   (closure
    (ids (list-of symbol?))
@@ -156,7 +163,8 @@
       (closure (ids body env)
                (unparse-expresion body (extend-env ids args env))))))
 
-;****************************************************************
+
+;------------------------------------UNPARSE PARA INTERPRETE-----------------------------------
 
 (define unparse-programa
   (lambda (pgm)
@@ -242,7 +250,7 @@
                                  "Attempt to apply non-procedure ~s" proc))))
       (set-exp (id exp)
                (setref! (unparse-ref(apply-env-ref env id)) exp env))
-      (else -1))])));continuar!!!!
+      (else -1))])))
 
 (define while-aux
   (lambda (con body env)
