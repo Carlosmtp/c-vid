@@ -214,7 +214,7 @@
       [(procval? exp) exp]
       [(function? exp)
        (cases function exp
-         (fun (id args e) )
+         (fun (id args e) 0)
       )]
       [(vector? exp) exp]
       [(list? exp) exp]
