@@ -178,6 +178,12 @@
    (body expresion?)
    (env environment?)))
 
+(define-datatype function function?
+  (fun
+   (id symbol?)
+   (args (list-of expresion?))
+   (exp expresion?)))
+
 ;apply-procedure: proc * args -> closure
 ;purpose: funcion definir un procedimiento  
 ;usage: evalua el cuerpo de un procedimientos en el ambiente extendido correspondiente
@@ -206,6 +212,10 @@
     (cond
       [(number? exp) exp]
       [(procval? exp) exp]
+      [(function? exp)
+       (cases function exp
+         (fun (id args e) )
+      )]
       [(vector? exp) exp]
       [(list? exp) exp]
       [else
@@ -266,6 +276,7 @@
               (if (unparse-expresion test-exp env)
                   (unparse-expresion true-exp env)
                   (unparse-expresion false-exp env)))
+      (cond-exp (conds exps els) (cond-aux conds exps els env))
       (while-exp (condition body)
                  (while-aux condition body env))
       (for-exp (id exp1 prim exp2 body)
@@ -277,9 +288,25 @@
                      (apply-procedure proc args)
                      (eopl:error 'eval-expresion
                                  "Attempt to apply non-procedure ~s" proc))))
+      (funcion (id args exp)
+            (set-env
+              (extend-env
+                                  (list id)
+                                  (list (fun id args exp))
+                                  env))
+               )
       (set-exp (id exp)
                (setref! (unparse-ref(apply-env-ref env id)) exp env))
       (else -1))])))
+
+(define cond-aux
+  (lambda (conds exps els env)
+    (cond
+      [(null? conds) (unparse-expresion els env)]
+      [(unparse-expresion (car conds) env)
+       (unparse-expresion (car exps) env)]
+      [else (cond-aux (cdr conds) (cdr exps) els env)])
+    ))
 
 ;unparse-for-prim: prim -> string
 ;purpose: funcion unparse para el indicador del for para aumentar o disminuir 

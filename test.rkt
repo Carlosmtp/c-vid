@@ -164,3 +164,7 @@
 ;set-reg(12 en a de {a:3,b:4,c:77})
 ;global (x = {a:3,b:4,c:77}) set-reg(12 en b de x) x
 ;¿registro? ({a:3,b:4,c:77})
+;cond [false 0] [true 2] else 3 end}
+;cond [compare(1<2) :(1+2)] [compare(1<2) :(20*3)] else :(-1~-2) end
+;cond [compare(1>2) :(1+2)] [compare(1>2) :(20*3)] else :(-1~-2) end
+;define f lambda (a b c) :(a+b)

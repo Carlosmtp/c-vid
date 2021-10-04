@@ -139,16 +139,16 @@
     (expresion (cadena) cad-exp)
     (expresion (lista) list-exp) ;unparse hecho
     (expresion (vect) vec-exp) ;unparse hecho
-    (expresion (registro) reg-exp)
+    (expresion (registro) reg-exp) ;unparse hecho
     (expresion ("sequence" "(" expresion ";" (arbno expresion ";") ")" "end") seq-exp) ;unparse hecho
     (expresion ("if" "(" expresion ")" "then" expresion "[" "else" expresion "]" "end") if-exp) ;unparse hecho
-    (expresion ("cond" (arbno "["expresion expresion"]") "else" expresion "end") cond-exp) 
+    (expresion ("cond" (arbno "["expresion expresion"]") "else" expresion "end") cond-exp) ;unparse hecho
     (expresion ("while" "(" expresion ")" "do" expresion "done") while-exp) ;unparse hecho
     (expresion ("for" "(" identificador "=" expresion for-prim expresion ")" "do" expresion "done") for-exp) ;unparse hecho
     (expresion (cad-prim) pred-cadena)
     (expresion (list-prim "(" expresion ")") pred-list) ;unparse hecho
     (expresion (vect-prim) pred-vect) ;unparse hecho
-    (expresion (reg-prim) pred-registro)
+    (expresion (reg-prim) pred-registro) ;unparse hecho
     (expresion ("define" identificador "lambda" "("(arbno expresion)")" expresion) funcion)
     (expresion ("set" identificador "=" expresion) set-exp) ;unparse hecho
     (expresion ("call(" expresion (arbno expresion) ")")  app-exp) ;unparse hecho
@@ -182,12 +182,12 @@
     (vect-prim ("set-vect" "("expresion "en" numero "de" expresion")") vect-set) ;unparse hecho
 
     ;---------- REGISTROS -----------
-    (registro ( "{" (separated-list identificador ":" expresion ",") "}" ) regist)
+    (registro ( "{" (separated-list identificador ":" expresion ",") "}" ) regist) ;unparse hecho
 
     ;primitivas de registros
-    (expr-bool ("registro?" "("expresion")") registro-pred)
-    (reg-prim ("ref-reg" "("identificador "de" expresion")") registro-ref)
-    (reg-prim ("set-reg" "("expresion "en" identificador "de" expresion")") registro-set)
+    (expr-bool ("registro?" "("expresion")") registro-pred) ;unparse hecho
+    (reg-prim ("ref-reg" "("identificador "de" expresion")") registro-ref) ;unparse hecho
+    (reg-prim ("set-reg" "("expresion "en" identificador "de" expresion")") registro-set) ;unparse hecho
 
     ;---------- BOOLEANOS -----------
     ;expresiones booleanas
@@ -213,7 +213,7 @@
     (pred-prim ("<(" expresion ")<") entre-abierto)
 
     ;---------- ARITMETICA -----------
-    (expresion (":" "(" expresion arit-prim")") oper-exp)
+    (expresion (":" "(" expresion arit-prim")") oper-exp) ;unparse hecho
     
     ;primitivas aritmeticas para decimales
     (arit-prim ("+" expresion) suma) ;unparse hecho
@@ -224,7 +224,7 @@
     (arit-prim ("--") disminuir) ;unparse hecho
 
     ;------- ARITMETICA OCTAL --------
-    (expresion ("o:" "(" expresion arit-prim-octal")") oper-exp-oct)
+    (expresion ("o:" "(" expresion arit-prim-octal")") oper-exp-oct) ;unparse hecho
     ;primitivas aritmeticas para octales
     (arit-prim-octal ("+" expresion) suma-octal) ;unparse hecho
     (arit-prim-octal ("-" expresion) resta-octal) ;unparse hecho
