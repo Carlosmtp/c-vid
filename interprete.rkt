@@ -337,7 +337,18 @@
       (lista-pred (lst) (list? (unparse-expresion lst env)))
       (lista-vacia-pred (lst) (null? (unparse-expresion lst env)))
       (vect-pred (vec)(vector? (unparse-expresion vec env)))
-      (registro-pred (reg) 0))))
+      (registro-pred (reg)
+        (let ([r (unparse-expresion reg env)] )
+         (cond
+          [(null? r) #f]
+          [(and
+            (list? r)
+            (list? (car r))
+            (not (null? (cdr r)))
+            (vector? (cadr r))) #t]
+          [else #f])
+        ))
+      )))
 
 (define unparse-vec
   (lambda (v env)
@@ -362,7 +373,8 @@
       (regist (ids vals)
               (list
                ids
-               (list->vector (map (lambda (i) (unparse-expresion i env)) vals)))
+               (list->vector
+                (map (lambda (i) (unparse-expresion i env)) vals)))
       ))))
 
 (define unparse-reg-prim
