@@ -19,24 +19,33 @@
 
 
 ;------------------------------------------REFERENCIAS---------------------------------------
+;definición del tipo de una referencia
 (define-datatype reference reference?
   (a-ref (position integer?)
          (vec vector?)))
 
+;dere!: ref -> procedimiento
+;purpose: funcion que llama a primitive-deref con el argumento
 (define deref
   (lambda (ref)
     (primitive-deref ref)))
 
+;primitive-deref: ref -> el valor de una referencia
+;purpose: funcion que recibe una referencia y retorna un valor
 (define primitive-deref
   (lambda (ref)
     (cases reference ref
       (a-ref (pos vec)
              (vector-ref vec pos)))))
 
+;setref!: ref * val * env -> procedimiento
+;purpose: funcion que recibe una referencia, un valor y el ambiente y se los pasa como argumento el primitive-setref!
 (define setref!
   (lambda (ref val env)
     (primitive-setref! ref (unparse-expresion val env))))
 
+;primitive-setref!: ref * val -> procedimiento
+;purpose: funcion que cambia el valor al que apunta una referencia en el ambiente
 (define primitive-setref!
      (lambda (ref val)
        (cases reference ref
@@ -67,19 +76,24 @@
 (define env-programa
  (vector (init-env) '()))
 
-;actualiza el ambiente del programa contenido en el vector env-programa
+;set-env: v -> ambiente actualizado
+;purpose: actualiza el ambiente del programa contenido en el vector env-programa
 (define set-env
   (lambda (v)
     (begin
     (vector-set! env-programa 0 v)
     (vector-ref env-programa 0))))
 
+;set-env-sta-aux: ids * v -> ambiente
+;purpose: funcion que cambia el ambiente agregando el static siempre y cuando no exista 
 (define set-env-sta
   (lambda (ids v)
     (set-env-sta-aux ids)
     (vector-set! env-programa 0 v)
     (vector-ref env-programa 0)))
 
+;set-env-sta-aux: ids -> 0 o error
+;purpose: funcion que busca en la lista de estatica la variable estatica, si existe genera error, si no, se agrega 
 (define set-env-sta-aux
   (lambda (ids)
     (cond
@@ -94,16 +108,19 @@
       )))
 
 ;extend-env: <list-of symbols> <list-of numbers> enviroment -> enviroment
-;función que crea un ambiente extendido
+;purpose: función que crea un ambiente extendido
 (define extend-env
   (lambda (syms vals env)
     (extended-env-record syms (list->vector vals) env))) 
 
-;función que busca un símbolo en un ambiente
+;apply-env: env * sym -> valor
+;purpose: funcion que recibe un simbolo que busca en el ambiente y retorna una valor
 (define apply-env
   (lambda (env sym)
     (deref (apply-env-ref env sym))))
 
+;apply-env-ref: env * sym -> referencia
+;purpose: funcion que recibe un simbolo que busca en el ambiente y retorna una referencia
 (define apply-env-ref
   (lambda (env sym)
     (cases environment env
@@ -123,7 +140,7 @@
                                              (apply-env-ref old-env sym)))))))
 
 ;extend-env-recursively: <list-of symbols> <list-of <list-of symbols>> <list-of expressions> environment -> environment
-;función que crea un ambiente extendido para procedimientos recursivos
+;purpose: función que crea un ambiente extendido para procedimientos recursivos
 (define extend-env-recursively
   (lambda (proc-names idss bodies old-env)
     (recursively-extended-env-record
@@ -132,10 +149,14 @@
 
 ;Funciones auxiliares ambientes
 
+;list-find-position: sym * los -> procedimientos
+;purpose: funcion que le pasa los argumentos a list-index
 (define list-find-position
   (lambda (sym los)
     (list-index (lambda (sym1) (eqv? sym1 sym)) los)))
 
+;list-index: pred * ls -> lista
+;purpose: funcion que encuentra la posicion de un simbolo en una lista  
 (define list-index
   (lambda (pred ls)
     (cond
@@ -149,14 +170,17 @@
 
 
 ;------------------------------------------PROCEDIMIENTOS---------------------------------------
+
+;usage: se construye un procval (un procedimiento) con datatypes
 (define-datatype procval procval?
   (closure
    (ids (list-of symbol?))
    (body expresion?)
    (env environment?)))
 
-;apply-procedure: evalua el cuerpo de un procedimientos en el ambiente extendido correspondiente
-
+;apply-procedure: proc * args -> closure
+;purpose: funcion definir un procedimiento  
+;usage: evalua el cuerpo de un procedimientos en el ambiente extendido correspondiente
 (define apply-procedure
   (lambda (proc args)
     (cases procval proc
@@ -165,13 +189,18 @@
 
 
 ;------------------------------------UNPARSE PARA INTERPRETE-----------------------------------
-
+;unparse-programa: pgm -> programa
+;purpose: funcion unparse para programa  
+;usage: interpreta y ejecuta un programa del lenguaje haciendo unparse a sus elementos
 (define unparse-programa
   (lambda (pgm)
     (cases programa pgm
       (un-programa (exp)
                     (unparse-expresion exp (vector-ref env-programa 0))))))
 
+;unparse-expresion: exp * env -> expresion
+;purpose: funcion unparse para expresion  
+;usage: interpreta y ejecuta una expresion del lenguaje
 (define unparse-expresion
   (lambda (exp env)
     (cond
@@ -252,53 +281,26 @@
                (setref! (unparse-ref(apply-env-ref env id)) exp env))
       (else -1))])))
 
-(define while-aux
-  (lambda (con body env)
-    (if (unparse-expresion con env)
-        (begin
-          (unparse-expresion body env)
-          (while-aux con body env))
-        '())))
-
-(define for-aux
-  (lambda (id exp1 prim exp2 body env)    
-    (cond
-      [(equal? (unparse-for-prim prim) "to")
-         (if (< (apply-env env id)(unparse-expresion exp2 env))
-             (begin
-               (unparse-expresion body env)
-               (setref! (unparse-ref(apply-env-ref env id)) (+ (unparse-expresion exp1 env) 1) env)
-               (for-aux id (apply-env env id) prim exp2 body env))
-             '())]
-      [(equal? (unparse-for-prim prim) "downto")
-         (if (> (apply-env env id)(unparse-expresion exp2 env))
-             (begin
-               (unparse-expresion body env)
-               (setref! (unparse-ref(apply-env-ref env id)) (- (unparse-expresion exp1 env) 1) env)
-               (for-aux id (apply-env env id) prim exp2 body env))
-             '())])))
-
-(define numlist->string
-  (lambda (l)
-    (cond
-      [(null? l) ""]
-      [(null? (cdr l)) (number->string(car l))]
-      [else (string-append
-             (number->string(car l))
-             " "
-             (numlist->string (cdr l)))]
-      )))
+;unparse-for-prim: prim -> string
+;purpose: funcion unparse para el indicador del for para aumentar o disminuir 
+;usage: convierte un indicador para el for del lenguaje de sintaxis abstracta a sintaxis concreta
 (define unparse-for-prim
   (lambda (prim)
     (cases for-prim prim
       (to-exp () "to")
       (downto-exp () "downto"))))
 
+;unparse-ref: ref -> referencia 
+;purpose: funcion unparse para una referencia 
+;usage: convierte una referencia de sintaxis abstracta a sintaxis concreta
 (define unparse-ref
   (lambda (ref)
     (cases reference ref
       (a-ref (pos vec) (a-ref pos vec)))))
 
+;unparse-pred-prim: boolprim * env -> procedimiento de racket 
+;purpose: funcion unparse para operadores de comparacion 
+;usage: interpreta un predicado de comparacion del lenguaje y retorna el procedimiento respectivo de racket
 (define unparse-pred-prim
   (lambda (boolprim env)
     (cases pred-prim boolprim
@@ -316,6 +318,9 @@
                       (unparse-expresion n env) i)
                      (< (unparse-expresion n env) f)))))))
 
+;unparse-list: lst * env -> lista 
+;purpose: funcion unparse para crear las listas
+;usage: interpreta una lista del lenguaje y retorna una lista de racket
 (define unparse-list
   (lambda (lst env)
     (cases lista lst
@@ -329,6 +334,10 @@
                            (unparse-expresion l2 env)))
       )
     ))
+
+;unparse-list-prim: lprim * exp -> lista o un elemento de una lista
+;purpose: funcion unparse para primitivas de listas
+;usage: interpreta y ejecuta una list-prim que son las operaciones con las listas del lenguaje
 (define unparse-list-prim
   (lambda (lprim exp)
     (if (null? exp) '()
@@ -339,6 +348,9 @@
                          (unparse-list-prim lprim (cdr exp))))
       ))))
 
+;unparse-expr-bool: exp * env -> bool
+;purpose: funcion unparse para expresiones booleanas
+;usage: interpreta y ejecuta una expr-bool que son los predicados del lenguaje
 (define unparse-expr-bool
   (lambda (exp env)
     (cases expr-bool exp
@@ -358,11 +370,17 @@
         ))
       )))
 
+;unparse-vect: v * env -> vector
+;purpose: funcion unparse para los vectores
+;usage: convierte una lista en vector 
 (define unparse-vec
   (lambda (v env)
     (cases vect v
       (vec (elems) (list->vector (map (lambda (i) (unparse-expresion i env)) elems))))))
 
+;unparse-vect-prim: v * env -> vector
+;purpose: funcion unparse para las primitivas de los vectores
+;usage: opera las expresiones de los vectores
 (define unparse-vect-prim
   (lambda (v env)
     (cases vect-prim v
@@ -375,6 +393,9 @@
                     (unparse-expresion val env))
       ))))
 
+;unparse-reg-prim: reg * env -> registro
+;purpose: funcion unparse para las primitivas de los registros
+;usage: opera las expresiones de los registros
 (define unparse-reg
   (lambda (reg env)
     (cases registro reg
@@ -385,6 +406,9 @@
                 (map (lambda (i) (unparse-expresion i env)) vals)))
       ))))
 
+;unparse-reg-prim: reg * env -> registro
+;purpose: funcion unparse para las primitivas de los registros
+;usage: opera las expresiones de los registros
 (define unparse-reg-prim
   (lambda (reg env)
     (cases reg-prim reg
@@ -397,6 +421,9 @@
                   (vector-set! (cadr r) (list-find-position id (car r)) (unparse-expresion val env))
       )))))
 
+;unparse-arit-prim: prim * env -> numero
+;purpose: funcion unparse para las primitivas aritmeticas de los numeros
+;usage: opera las expresiones de los numeros
 (define unparse-arit-prim
   (lambda (prim env)
     (cases arit-prim prim
@@ -407,6 +434,9 @@
       (aumentar  () (lambda(n) (+ n 1)))
       (disminuir () (lambda(n) (- n 1))))))
 
+;unparse-arit-prim-octal: prim * env -> octal
+;purpose: funcion unparse para las primitivas de los octales
+;usage: opera las expresiones de los octales 
 (define unparse-arit-prim-octal
   (lambda (prim env)
     (cases arit-prim-octal prim
@@ -416,6 +446,9 @@
       (aumentar-octal  () (lambda(n) (successor n )))
       (disminuir-octal () (lambda(n) (predecessor  n))))))
 
+;unparse-oper-bin-bool: oper -> bool
+;purpose: funcion unparse para los operadores binarios booleanos
+;usage: evalua dos elementos con los operadores booleanos 
 (define unparse-oper-bin-bool
   (lambda (oper)
     (cases oper-bin-bool oper
@@ -423,15 +456,62 @@
       (or-oper  () (lambda (p q) (or p q)))
       (xor-oper () (lambda (p q) (not (equal? p q)))))))
 
-; funciones auxiliares para aplicar unparse-expresion a cada elemento de una 
-;separated-list
+;------------------------------FUNCIONES AUXILIARES PARA UNPARSE-EXPRESION----------------------------------------
+
+;unparse-rands: rands * env -> <void>
+;purpose: funcion auxiliar para recorrer los operandos
+;usage: funcion auxiliar para aplicar unparse-expresion a cada elemento de una separated-list
 (define unparse-rands
   (lambda (rands env)
     (map (lambda (i) (unparse-expresion i env)) rands)))
 
+;while-aux: con * body * env -> <void>
+;purpose: funcion auxiliar para hacer un bucle para el whilee 
+(define while-aux
+  (lambda (con body env)
+    (if (unparse-expresion con env)
+        (begin
+          (unparse-expresion body env)
+          (while-aux con body env))
+        '())))
 
-;funciones para numeros octales
+;for-aux: id * exp1 * prim * exp2 * body * env -> <void>
+;purpose: funcion auxiliar para hacer un bucle para el for
+;usage: for-aux retorna de acuerdo a la entrada de la primitiva, si es to aumenta exp1 hasta que sea igual a exp2
+; si es downto disminuye exp1 hasta que sea igual a exp2
+(define for-aux
+  (lambda (id exp1 prim exp2 body env)    
+    (cond
+      [(equal? (unparse-for-prim prim) "to")
+         (if (< (apply-env env id)(unparse-expresion exp2 env))
+             (begin
+               (unparse-expresion body env)
+               (setref! (unparse-ref(apply-env-ref env id)) (+ (unparse-expresion exp1 env) 1) env)
+               (for-aux id (apply-env env id) prim exp2 body env))
+             '())]
+      [(equal? (unparse-for-prim prim) "downto")
+         (if (> (apply-env env id)(unparse-expresion exp2 env))
+             (begin
+               (unparse-expresion body env)
+               (setref! (unparse-ref(apply-env-ref env id)) (- (unparse-expresion exp1 env) 1) env)
+               (for-aux id (apply-env env id) prim exp2 body env))
+             '())])))
 
+;numlist->string: lista de numeros -> string
+;purpose: convertir una lista de numeros a string
+;usage: numlist->string retorna un string
+(define numlist->string
+  (lambda (l)
+    (cond
+      [(null? l) ""]
+      [(null? (cdr l)) (number->string(car l))]
+      [else (string-append
+             (number->string(car l))
+             " "
+             (numlist->string (cdr l)))]
+      )))
+
+;----------------------------------------------------------------------------------------------------
 
 ;Base
 (define N 8)
@@ -467,8 +547,7 @@
 ;sucessor: list -> list
 ;purpose: retornar el sucesor de n en base N
 ;usage (successor n) retrona una lista con el sucesor de n si es una
-;                             representación válida en N, de lo contrario
-;                             retorna un error
+;representación válida en N, de lo contrario retorna un error
 (define successor
   (lambda (n)
     (cond
@@ -485,8 +564,7 @@
 ;predecessor: list -> list
 ;purpose: retornar el predecesor de n en base N
 ;usage (successor n) retrona una lista con el predecesor de n si es una
-;                             representación válida en N, de lo contrario
-;                             retorna un error
+;representación válida en N, de lo contrario retorna un error
 (define predecessor
     (lambda (n)
     (cond
@@ -499,9 +577,9 @@
       [else (eopl:error 'Bignum "No se pueden representar números con dígitos mayores o iguales a N")])))
 
 
-;-------------------------------------CÓDIGO CLIENTE------------------------------------------
+;------------------------------------------------------------------------------------------
 
-;suma: list -> list
+;sumaOctal: list -> list
 ;purpose: sumar dos n en base N
 ;usage (suma x y) retorna la suma en base N de x e y
 (define sumaOctal
@@ -512,7 +590,7 @@
 
 ;----------------------------------------------------------------------------------------------------
 
-;resta: list -> list
+;restaOctal: list -> list
 ;purpose: restar dos n en base N
 ;usage (resta x y) retorna la resta en base N de x e y
 (define restaOctal
@@ -532,3 +610,5 @@
         (zero)
         (sumaOctal (multiplicacionOctal (predecessor x) y) y))
     ))
+
+(interpreter)
