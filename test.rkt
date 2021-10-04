@@ -158,4 +158,9 @@
 ;¿vect?(vec[2])
 ;¿vect?(38)
 ;ref-vect(2 de vec[0;1;2;3;4])
-;global (x = vec[0;1;2;3;4]) set-vect(99 en 2 de x)
+;global (x = vec[0;1;2;3;4]) set-vect(99 en 2 de x) x
+;ref-reg(a de {a:2})
+;ref-reg(b de {a:3,b:4,c:77})
+;set-reg(12 en a de {a:3,b:4,c:77})
+;global (x = {a:3,b:4,c:77}) set-reg(12 en b de x) x
+;¿registro? ({a:3,b:4,c:77})
